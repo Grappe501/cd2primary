@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="/assets/css/site.css" />
+    <title>Team Profile • AR-02 #PrimaryVote! Scavenger Hunt</title>
+    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+  </head>
+  <body>
+
+    <header class="nav">
+      <div class="container nav-inner spread">
+        <a class="brand" href="/">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <span>AR-02 #PrimaryVote! Scavenger Hunt</span>
+        </a>
+        <nav class="nav-links" aria-label="Primary">
+          <a href="/rules/">Rules</a>
+          <a href="/handout/">Handout</a>
+          <a href="/counties/">Counties</a>
+          <a href="/leaderboard/">Leaderboard</a>
+          <a class="btn primary" href="/app/">Join / Sign In</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="section" style="padding-top:2rem;">
+        <div class="card">
+          <div class="spread" style="gap:1rem; align-items:flex-start;">
+            <div>
+              <h1 style="margin:0;">Team Profile</h1>
+              <p class="lede" style="margin: .5rem 0 0 0;">
+                This is your official team profile. All submissions and points are tied to this page.
+              </p>
+            </div>
+            <div class="row" style="flex-wrap:wrap;">
+              <button class="btn" id="btnAccount" type="button">Account</button>
+              <button class="btn" id="btnLogout" type="button">Log out</button>
+              <a class="btn" href="/leaderboard/">Leaderboard</a>
+            </div>
+          </div>
+
+          <hr class="hr" />
+
+          <div id="status" class="badge" aria-live="polite">Checking login status…</div>
+
+          <div id="signedOut" style="margin-top:1rem;" hidden>
+            <p style="margin:0 0 .75rem 0;">
+              You must sign in to create or edit your team.
+            </p>
+            <div class="row" style="flex-wrap:wrap;">
+              <a class="btn primary" href="/app/">Go to Join / Sign In</a>
+              <button class="btn" id="btnSignIn" type="button">Sign In Here</button>
+            </div>
+          </div>
+
+          <div id="signedIn" style="margin-top:1rem;" hidden>
+            <div class="grid cols-2" style="align-items:start;">
+              <div>
+                <h2 style="margin-top:0;">Team Info</h2>
+                <form id="teamForm">
+                  <label class="label" for="teamName">Team Name</label>
+                  <input class="input" id="teamName" name="teamName" required />
+                  <div class="help" id="err_teamName"></div>
+
+                  <label class="label" for="homeCounty" style="margin-top:.75rem;">Home County</label>
+                  <select class="input" id="homeCounty" name="homeCounty" required>
+                    <option value="">Select a county…</option>
+                    <option value="cleburne">Cleburne</option>
+                    <option value="conway">Conway</option>
+                    <option value="faulkner">Faulkner</option>
+                    <option value="perry">Perry</option>
+                    <option value="pulaski">Pulaski</option>
+                    <option value="saline">Saline</option>
+                    <option value="van-buren">Van Buren</option>
+                    <option value="white">White</option>
+                  </select>
+                  <div class="help" id="err_homeCounty"></div>
+
+                  <hr class="hr" style="margin:1rem 0;" />
+
+                  <h2 style="margin:0 0 .5rem 0;">Team Members</h2>
+
+                  <label class="label" for="member1Name">Member 1 Name</label>
+                  <input class="input" id="member1Name" name="member1Name" required />
+                  <div class="help" id="err_member1Name"></div>
+
+                  <label class="label" for="member1TikTok" style="margin-top:.75rem;">Member 1 TikTok Handle</label>
+                  <input class="input" id="member1TikTok" name="member1TikTok" placeholder="@handle" required />
+                  <div class="help" id="err_member1TikTok"></div>
+
+                  <label class="label" for="member2Name" style="margin-top:1rem;">Member 2 Name</label>
+                  <input class="input" id="member2Name" name="member2Name" required />
+                  <div class="help" id="err_member2Name"></div>
+
+                  <label class="label" for="member2TikTok" style="margin-top:.75rem;">Member 2 TikTok Handle</label>
+                  <input class="input" id="member2TikTok" name="member2TikTok" placeholder="@handle" required />
+                  <div class="help" id="err_member2TikTok"></div>
+
+                  <div class="row" style="margin-top:1.25rem; flex-wrap:wrap;">
+                    <button class="btn primary" id="btnSave" type="submit">Save Team Profile</button>
+                    <button class="btn" id="btnReload" type="button">Reload</button>
+                  </div>
+
+                  <p class="lede" style="margin-top:1rem;">
+                    This is your official team identity. Next: log your videos below.
+                  </p>
+                </form>
+              </div>
+
+              <aside>
+                <div class="card" style="margin-bottom:1rem;">
+                  <h2 style="margin-top:0;">Current Status</h2>
+                  <div class="badge" id="teamState">Loading…</div>
+                  <div style="margin-top:.75rem;" class="help" id="teamMeta"></div>
+                </div>
+
+                <div class="card">
+                  <h2 style="margin-top:0;">Rules that matter</h2>
+                  <ul style="margin:0; padding-left:1.25rem;">
+                    <li><strong>One team per account.</strong></li>
+                    <li><strong>Teams of two.</strong> Both TikTok handles are required.</li>
+                    <li><strong>If you don’t list it, you don’t get it.</strong></li>
+                  </ul>
+                </div>
+              </aside>
+            </div>
+
+            <hr class="hr" style="margin:1.25rem 0;" />
+
+            <div id="submissionsWrap" hidden>
+              <div class="card">
+                <div class="spread" style="gap:1rem; align-items:flex-start;">
+                  <div>
+                    <h2 style="margin:0;">Submissions</h2>
+                    <p class="lede" style="margin:.35rem 0 0 0;">
+                      Volunteers do not get points unless they list the submission.
+                    </p>
+                  </div>
+                  <div class="row" style="flex-wrap:wrap;">
+                    <button class="btn primary" id="btnNewSubmission" type="button">Submit a Video</button>
+                  </div>
+                </div>
+
+                <div id="submissionFormWrap" style="margin-top:1rem;" hidden>
+                  <form id="submissionForm">
+                    <div class="grid cols-2" style="align-items:start;">
+                      <div>
+                        <label class="label" for="videoUrl">Video Link (public)</label>
+                        <input class="input" id="videoUrl" name="videoUrl" placeholder="https://www.tiktok.com/..." required />
+                        <div class="help" id="err_videoUrl"></div>
+
+                        <label class="label" for="submissionType" style="margin-top:.75rem;">Submission Type</label>
+                        <select class="input" id="submissionType" name="submissionType" required>
+                          <option value="">Choose a type…</option>
+                          <option value="polling_location">Polling Location Explainer</option>
+                          <option value="support_chris">Why I Support Chris Jones</option>
+                          <option value="volunteer_event">Campaign Volunteer Event (Live)</option>
+                          <option value="recruit_bonus">New Team Recruit Bonus</option>
+                          <option value="candidate_interview">Candidate Interview Bonus</option>
+                          <option value="other">Other / Notes</option>
+                        </select>
+                        <div class="help" id="err_submissionType"></div>
+
+                        <label class="label" for="submissionDate" style="margin-top:.75rem;">Posting Date</label>
+                        <input class="input" id="submissionDate" name="submissionDate" type="date" required />
+                        <div class="help" id="err_submissionDate"></div>
+
+                        <label class="label" for="expectedPoints" style="margin-top:.75rem;">Expected Points (what you believe you earned)</label>
+                        <input class="input" id="expectedPoints" name="expectedPoints" type="number" min="0" step="1" required />
+                        <div class="help" id="err_expectedPoints"></div>
+                      </div>
+
+                      <div>
+                        <div id="pollingFields" hidden>
+                          <label class="label" for="pollingCounty">Polling Location County</label>
+                          <select class="input" id="pollingCounty" name="pollingCounty">
+                            <option value="">Select a county…</option>
+                            <option value="cleburne">Cleburne</option>
+                            <option value="conway">Conway</option>
+                            <option value="faulkner">Faulkner</option>
+                            <option value="perry">Perry</option>
+                            <option value="pulaski">Pulaski</option>
+                            <option value="saline">Saline</option>
+                            <option value="van-buren">Van Buren</option>
+                            <option value="white">White</option>
+                          </select>
+                          <div class="help" id="err_pollingCounty"></div>
+
+                          <label class="label" for="pollingName" style="margin-top:.75rem;">Polling Location Name (as written on site)</label>
+                          <input class="input" id="pollingName" name="pollingName" />
+
+                          <label class="label" style="margin-top:.75rem;">Claimed Checklist Items</label>
+                          <div class="help">We only verify what you claim. If you don’t list it, you don’t get it.</div>
+                          <label class="row" style="align-items:center; gap:.5rem; margin-top:.5rem;">
+                            <input type="checkbox" name="claimedItems" value="address" /> Address of the polling location
+                          </label>
+                          <label class="row" style="align-items:center; gap:.5rem; margin-top:.35rem;">
+                            <input type="checkbox" name="claimedItems" value="geography" /> Where it is geographically
+                          </label>
+                          <label class="row" style="align-items:center; gap:.5rem; margin-top:.35rem;">
+                            <input type="checkbox" name="claimedItems" value="early_voting" /> Early voting timeline
+                          </label>
+                          <label class="row" style="align-items:center; gap:.5rem; margin-top:.35rem;">
+                            <input type="checkbox" name="claimedItems" value="primary_explainer" /> Primary + nonpartisan explainer
+                          </label>
+                          <label class="row" style="align-items:center; gap:.5rem; margin-top:.35rem;">
+                            <input type="checkbox" name="claimedItems" value="say_vote_chris" /> Say “Vote for Chris Jones for Congress”
+                          </label>
+                          <div class="help" id="err_claimedItems"></div>
+                        </div>
+
+                        <label class="label" for="notes" style="margin-top:0;">Notes (optional)</label>
+                        <textarea class="input" id="notes" name="notes" rows="6" placeholder="Anything the reviewers should know…"></textarea>
+
+                        <label class="row" style="align-items:center; gap:.5rem; margin-top:.75rem;">
+                          <input type="checkbox" id="confirmHashtags" name="confirmHashtags" required />
+                          I confirm the caption includes <strong>#PrimaryVote!</strong> and <strong>#ChrisJonesforCongress</strong>.
+                        </label>
+                        <div class="help" id="err_confirmHashtags"></div>
+
+                        <div class="row" style="margin-top:1rem; flex-wrap:wrap;">
+                          <button class="btn primary" id="btnSubmitVideo" type="submit">Submit</button>
+                          <button class="btn" id="btnCancelSubmission" type="button">Cancel</button>
+                        </div>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+
+                <div id="submissionsStatus" class="help" style="margin-top:1rem;"></div>
+                <div id="submissionsList" style="margin-top:1rem;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="container spread">
+        <div>
+          <div><strong>Chris Jones for Congress</strong></div>
+          <small>AR-02 #PrimaryVote! Scavenger Hunt • Feb 13 – Mar 3, 2026</small>
+        </div>
+        <div class="row">
+          <a href="/rules/">Rules</a>
+          <a href="/leaderboard/">Leaderboard</a>
+          <a href="/counties/">Counties</a>
+        </div>
+      </div>
+    </footer>
+
+    <script type="module" src="/assets/js/profile.js"></script>
+  </body>
+</html>

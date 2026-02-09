@@ -1,0 +1,33 @@
+/* Design tokens (initial pass). Adjust to match campaign site as needed. */
+:root{
+  --container: 1120px;
+
+  --bg: #0b0f14;
+  --surface: #111827;
+  --surface-2: #0f172a;
+
+  --text: #f8fafc;
+  --muted: #cbd5e1;
+
+  --primary: #ffffff;
+  --accent: #60a5fa;   /* blue-ish accent */
+  --accent-2: #22c55e; /* secondary accent */
+
+  --border: rgba(255,255,255,.10);
+
+  --radius: 18px;
+  --radius-sm: 12px;
+
+  --shadow: 0 18px 60px rgba(0,0,0,.35);
+
+  --space-1: .5rem;
+  --space-2: .75rem;
+  --space-3: 1rem;
+  --space-4: 1.25rem;
+  --space-5: 1.75rem;
+  --space-6: 2.25rem;
+
+  --h1: clamp(2rem, 3.5vw, 3rem);
+  --h2: clamp(1.25rem, 2vw, 1.75rem);
+  --lede: 1.1rem;
+}

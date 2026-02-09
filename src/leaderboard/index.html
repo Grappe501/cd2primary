@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" href="/assets/css/site.css" />
+<link rel="stylesheet" href="/assets/css/print.css" media="print" />
+
+    <title>Leaderboard • AR-02 #PrimaryVote! Scavenger Hunt</title>
+  </head>
+  <body>
+    
+<header class="nav">
+  <div class="container nav-inner spread">
+    <a class="brand" href="/">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span>AR-02 #PrimaryVote! Scavenger Hunt</span>
+    </a>
+    <nav class="nav-links" aria-label="Primary">
+      <a href="/rules/">Rules</a>
+      <a href="/handout/">Handout</a>
+      <a href="/counties/">Counties</a>
+      <a href="/leaderboard/">Leaderboard</a>
+      <a class="btn primary" href="/app/">Join / Sign In</a>
+    </nav>
+  </div>
+</header>
+
+    <main class="container section">
+      <section class="hero" style="padding-top:1.5rem;">
+        <h1>Leaderboard</h1>
+        <p class="lede">
+          This page shows <strong>all teams</strong> and scores. (Mock data for now — will be replaced with live DB scoring later.)
+        </p>
+      </section>
+
+      <section class="grid cols-3" style="margin-top: 1rem;">
+        <article class="card">
+          <h2>How ranking works</h2>
+          <p>Teams are ranked by total approved points. Submissions must be listed on the team profile to count.</p>
+        </article>
+        <article class="card">
+          <h2>Hashtag gate</h2>
+          <p><strong>#PrimaryVote!</strong> and <strong>#ChrisJonesforCongress</strong> must be present or the submission earns 0.</p>
+        </article>
+        <article class="card">
+          <h2>Deadline</h2>
+          <p>All entries must be submitted by <strong>5:00 PM on March 3, 2026</strong>.</p>
+        </article>
+      </section>
+
+      <section class="section" style="padding-top:0;">
+        <div class="card">
+          <div class="spread" style="gap:1rem;">
+            <div class="row" style="gap:.75rem;">
+              <label class="badge" style="cursor:default;">Sort</label>
+              <select data-sort class="btn" style="padding:.55rem .8rem;">
+                <option value="points" selected>Points (High → Low)</option>
+                <option value="lastApproved">Last Approved</option>
+                <option value="teamName">Team Name (A→Z)</option>
+                <option value="homeCounty">County (A→Z)</option>
+              </select>
+
+              <label class="badge" style="cursor:default;">County</label>
+              <select data-county class="btn" style="padding:.55rem .8rem;">
+                <option value="ALL" selected>All</option>
+                <option>Pulaski</option>
+                <option>Faulkner</option>
+                <option>Saline</option>
+                <option>White</option>
+                <option>Cleburne</option>
+                <option>Perry</option>
+                <option>Conway</option>
+                <option>Van Buren</option>
+              </select>
+            </div>
+
+            <div class="row" style="gap:.75rem;">
+              <label class="badge" style="cursor:default;">Search</label>
+              <input data-search class="btn" style="padding:.55rem .8rem; min-width: 240px;" placeholder="Team or county…" />
+            </div>
+          </div>
+
+          <p data-error style="margin-top:.75rem; color: var(--muted);"></p>
+
+          <div style="overflow:auto; margin-top: .75rem;">
+            <table style="width:100%; border-collapse: collapse; min-width: 860px;">
+              <thead>
+                <tr>
+                  <th style="text-align:left; padding:.65rem .5rem; border-bottom:1px solid var(--border);">#</th>
+                  <th style="text-align:left; padding:.65rem .5rem; border-bottom:1px solid var(--border);">Team</th>
+                  <th style="text-align:left; padding:.65rem .5rem; border-bottom:1px solid var(--border);">Home County</th>
+                  <th style="text-align:right; padding:.65rem .5rem; border-bottom:1px solid var(--border);">Points</th>
+                  <th style="text-align:left; padding:.65rem .5rem; border-bottom:1px solid var(--border);">Last Approved</th>
+                  <th style="text-align:left; padding:.65rem .5rem; border-bottom:1px solid var(--border);">Badges</th>
+                </tr>
+              </thead>
+              <tbody data-teams></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+    
+<footer class="footer">
+  <div class="container spread">
+    <div>
+      <div><strong>Chris Jones for Congress</strong></div>
+      <small>AR-02 #PrimaryVote! Scavenger Hunt • Feb 13 – Mar 3, 2026</small>
+    </div>
+    <div class="row">
+      <a href="/rules/">Rules</a>
+      <a href="/leaderboard/">Leaderboard</a>
+      <a href="/counties/">Counties</a>
+    </div>
+  </div>
+</footer>
+
+    <script type="module" src="/assets/js/leaderboard.mock.js"></script>
+  </body>
+</html>

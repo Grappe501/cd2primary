@@ -1,0 +1,93 @@
+[
+  {
+    "teamId": "T-001",
+    "teamName": "Ward Warriors",
+    "homeCounty": "Pulaski",
+    "points": 185,
+    "lastApproved": "2026-02-18",
+    "badges": [
+      "8-County Sweep",
+      "5-Day Streak"
+    ]
+  },
+  {
+    "teamId": "T-002",
+    "teamName": "River Runners",
+    "homeCounty": "Faulkner",
+    "points": 172,
+    "lastApproved": "2026-02-19",
+    "badges": [
+      "3-Day Streak"
+    ]
+  },
+  {
+    "teamId": "T-003",
+    "teamName": "Delta Door-Knockers",
+    "homeCounty": "White",
+    "points": 161,
+    "lastApproved": "2026-02-17",
+    "badges": [
+      "Recruiter"
+    ]
+  },
+  {
+    "teamId": "T-004",
+    "teamName": "Saline Signal Crew",
+    "homeCounty": "Saline",
+    "points": 149,
+    "lastApproved": "2026-02-19",
+    "badges": []
+  },
+  {
+    "teamId": "T-005",
+    "teamName": "Conway Courthouse Crew",
+    "homeCounty": "Conway",
+    "points": 140,
+    "lastApproved": "2026-02-16",
+    "badges": [
+      "Candidate Interview"
+    ]
+  },
+  {
+    "teamId": "T-006",
+    "teamName": "Cleburne Climbers",
+    "homeCounty": "Cleburne",
+    "points": 132,
+    "lastApproved": "2026-02-15",
+    "badges": []
+  },
+  {
+    "teamId": "T-007",
+    "teamName": "Van Buren Voters",
+    "homeCounty": "Van Buren",
+    "points": 120,
+    "lastApproved": "2026-02-14",
+    "badges": []
+  },
+  {
+    "teamId": "T-008",
+    "teamName": "Perry Poll Pros",
+    "homeCounty": "Perry",
+    "points": 118,
+    "lastApproved": "2026-02-14",
+    "badges": [
+      "3-Day Streak"
+    ]
+  },
+  {
+    "teamId": "T-009",
+    "teamName": "Jacksonville Jumpstart",
+    "homeCounty": "Pulaski",
+    "points": 110,
+    "lastApproved": "2026-02-14",
+    "badges": []
+  },
+  {
+    "teamId": "T-010",
+    "teamName": "Bryant Ballot Builders",
+    "homeCounty": "Saline",
+    "points": 104,
+    "lastApproved": "2026-02-13",
+    "badges": []
+  }
+]
