@@ -39,3 +39,9 @@
 - Added submission create + list Netlify Functions
 - Enforced “if you don’t list it, you don’t get it” flow (teams submit link + expected points)
 - Added polling-location checklist claim capture and hashtag confirmation gate
+
+## Overlay 08
+- Major brand + readability upgrade across the entire site
+- Switched to campaign-style palette (warm cream background, deep navy primary, orange accents)
+- Set sensible global defaults (body background/text, links, focus rings, headings)
+- Improved contrast on cards, buttons, nav, and form fields

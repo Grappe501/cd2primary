@@ -1,40 +1,36 @@
-# Overlay 07 — Submissions Hub
+# Overlay 08 — Brand & Readability Upgrade
 
-**Goal:** Add the “Submit a Video” workflow on the Team Profile page. Teams must log every video here (link + type + claimed items + expected points) so campaign staff can later review and score.
+**Goal:** Fix readability issues (low contrast / washed text) and shift the entire UI to match the **Chris Jones for Congress** brand vibe.
+
+This overlay focuses **only** on styling. No logic, scoring, submissions, or admin changes.
 
 ## What changed
 
-### UI
-- `/app/profile/` now includes a **Submissions** section (auth-gated via existing profile page).
-- “Submit a Video” opens an in-page form:
-  - Video link (public)
-  - Submission type
-  - Posting date
-  - Expected points
-  - **Polling Location** specific fields:
-    - County
-    - Polling location name (optional)
-    - Claimed checklist items (required: at least one)
-  - Hashtag confirmation checkbox (required)
-  - Notes (optional)
-- Submissions render as cards with status **Pending review**.
+### Design tokens
+- Replaced the previous dark/low-contrast token set with a campaign-style palette:
+  - Warm cream background
+  - Deep navy primary
+  - Orange accent
+- Updated shadows, borders, and muted text to remain readable on light surfaces.
 
-### Backend
-- Netlify Functions:
-  - `/.netlify/functions/submission-create` (POST)
-  - `/.netlify/functions/submission-list` (GET)
-- Validation is enforced server-side (422 with field-level errors).
-- Deadline enforced server-side:
-  - **Mar 3, 2026 • 5:00 PM America/Chicago** (stored as 2026-03-03T23:00:00Z).
+### Base styles
+- Added missing global defaults that were causing the “light gray on white” problem:
+  - `body` background + text color
+  - Typography + spacing defaults
+  - Strong, visible focus rings (keyboard accessible)
 
-## Storage
-- Uses **Netlify Blobs** store: `teams`
-- One-record-per-submission:
-  - `submissions/{teamId}/{submissionId}.json`
-- Per-team submission index:
-  - `submissions/index/{teamId}.json`
+### Components
+- Updated nav, cards, buttons, badges, and form fields to match the new palette.
+- Tightened hover + active states so everything reads clearly.
 
-## Non-goals (explicitly not included)
-- No scoring engine (Overlay 08)
-- No admin review tooling (Overlay 10+)
-- No submission edits/deletes yet
+## Files changed
+- `src/assets/css/tokens.css`
+- `src/assets/css/base.css`
+- `src/assets/css/components.css`
+- `CHANGELOG.md`
+
+## Non-goals
+- No new pages
+- No scoring logic
+- No admin tooling
+- No changes to storage or functions
