@@ -50,3 +50,10 @@
 - Added cross-post platform support for submissions (TikTok / Instagram / Facebook / X / Bluesky)
 - Updated rules + handout to define +5 bonus per additional platform cross-posted
 - Updated submission validation and list rendering to handle multiple platform links
+
+## Overlay 09
+- Added deterministic scoring engine (server-side) based on submission fields (base points + hashtag bonus + cross-post bonus)
+- Added polling-location area type field (Little Rock / major city limits / other) to compute checklist points correctly
+- Added score API (/.netlify/functions/score-get) returning official vs provisional totals and 8-county sweep bonus (official only)
+- Team Profile now displays score summary card and shows calculated points per submission
+- Added client-side scoring preview to help teams estimate expected points consistently

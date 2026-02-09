@@ -1,6 +1,7 @@
 import { getStore } from "@netlify/blobs";
 import { json, requireUser } from "./_lib/team.js";
 import { error422, isDeadlinePassed, validateSubmissionInput } from "./_lib/submissions.js";
+import { calcCalculatedPoints, SCORING_VERSION } from "./_lib/scoring.js";
 
 export default async (req, context) => {
   if (req.method !== "POST") {
@@ -39,6 +40,9 @@ export default async (req, context) => {
   const submissionId = crypto.randomUUID();
   const now = new Date().toISOString();
 
+  const cleaned = v.cleaned;
+  const computed = calcCalculatedPoints(cleaned);
+
   const submission = {
     submissionId,
     teamId,
@@ -46,7 +50,13 @@ export default async (req, context) => {
     createdAt: now,
     updatedAt: now,
     status: "pending",
-    ...v.cleaned
+    ...cleaned,
+    scoringVersion: SCORING_VERSION,
+    basePoints: computed.basePoints,
+    hashtagBonus: computed.hashtagBonus,
+    crossPostBonus: computed.crossPostBonus,
+    calculatedPoints: computed.calculatedPoints,
+    platformCount: computed.platformCount
   };
 
   const key = `submissions/${teamId}/${submissionId}.json`;
@@ -60,7 +70,8 @@ export default async (req, context) => {
     submissionId,
     createdAt: now,
     submissionType: submission.submissionType,
-    expectedPoints: submission.expectedPoints
+    expectedPoints: submission.expectedPoints,
+    calculatedPoints: submission.calculatedPoints
   });
   await store.set(idxKey, JSON.stringify({ items }), { contentType: "application/json" });
 

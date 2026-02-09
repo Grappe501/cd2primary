@@ -11,9 +11,19 @@ const btnReload = document.getElementById("btnReload");
 const form = document.getElementById("teamForm");
 const teamStateEl = document.getElementById("teamState");
 const teamMetaEl = document.getElementById("teamMeta");
+const scoreBox = document.getElementById("scoreBox");
 
 let loadedTeam = null;
 let submissions = null;
+
+function esc(s) {
+  return String(s ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
 
 function setStatus(text, { ok = true } = {}) {
   statusEl.textContent = text;
@@ -75,6 +85,44 @@ async function api(path, { method = "GET", body } = {}) {
   return { res, data };
 }
 
+function renderScore(score) {
+  if (!scoreBox) return;
+  if (!score) {
+    scoreBox.innerHTML = "";
+    return;
+  }
+
+  scoreBox.innerHTML = `
+    <div class="card" style="margin-top:1rem;">
+      <h3 style="margin:0 0 .5rem 0;">Score</h3>
+      <div class="grid" style="grid-template-columns: repeat(3, minmax(0,1fr)); gap:.75rem;">
+        <div class="card" style="padding:.75rem; margin:0;">
+          <div class="help">Official (approved)</div>
+          <div style="font-size:1.5rem;"><strong>${esc(score.officialPoints)}</strong></div>
+        </div>
+        <div class="card" style="padding:.75rem; margin:0;">
+          <div class="help">Provisional (incl. pending)</div>
+          <div style="font-size:1.5rem;"><strong>${esc(score.provisionalPoints)}</strong></div>
+        </div>
+        <div class="card" style="padding:.75rem; margin:0;">
+          <div class="help">8-county sweep bonus</div>
+          <div style="font-size:1.5rem;"><strong>${esc(score.eightCountySweepBonus)}</strong></div>
+        </div>
+      </div>
+      <div class="help" style="margin-top:.75rem;">Official points only count once a submission is approved (admin review comes later). Provisional points help you self-check.</div>
+    </div>
+  `;
+}
+
+async function loadScore() {
+  const user = currentUser();
+  if (!user) return;
+
+  const { res, data } = await api("/.netlify/functions/score-get");
+  if (!res.ok) return;
+  renderScore(data.score);
+}
+
 async function loadTeam() {
   clearErrors();
   const user = currentUser();
@@ -97,6 +145,7 @@ async function loadTeam() {
     teamStateEl.classList.remove("success");
     fillForm(null);
     teamMetaEl.textContent = "";
+    renderScore(null);
 
     // Hide submissions until a team exists.
     submissions?.setTeam(null);
@@ -110,6 +159,7 @@ async function loadTeam() {
 
   // Enable submissions hub
   submissions?.setTeam(loadedTeam);
+  await loadScore();
 }
 
 async function saveTeam(e) {
@@ -130,9 +180,10 @@ async function saveTeam(e) {
   btn.textContent = creating ? "Creating…" : "Saving…";
 
   try {
-    const { res, data } = await api(`/.netlify/functions/${creating ? "team-create" : "team-update"}`,
-      { method: creating ? "POST" : "PUT", body: payload }
-    );
+    const { res, data } = await api(`/.netlify/functions/${creating ? "team-create" : "team-update"}`, {
+      method: creating ? "POST" : "PUT",
+      body: payload
+    });
 
     if (!res.ok) {
       if (res.status === 422) {
@@ -159,21 +210,24 @@ function renderAuth() {
     setStatus("Not signed in. Please sign in to continue.", { ok: false });
     signedOutEl.hidden = false;
     signedInEl.hidden = true;
+    renderScore(null);
     return;
   }
+
   setStatus(`Signed in as ${user.email}`);
   signedOutEl.hidden = true;
   signedInEl.hidden = false;
 
-  // Init submissions UI once per session.
-  if (!submissions) submissions = initSubmissions({ api });
   loadTeam();
 }
 
 // Boot
 const identity = initIdentity();
 
-submissions = initSubmissions({ api });
+submissions = initSubmissions({
+  api,
+  onChanged: () => loadScore()
+});
 
 btnSignIn?.addEventListener("click", () => identity && identity.open());
 btnAccount?.addEventListener("click", () => identity && identity.open());

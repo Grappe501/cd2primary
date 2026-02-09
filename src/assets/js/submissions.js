@@ -1,4 +1,5 @@
 // Overlay 07: Submissions hub (client)
+// Overlay 09: Scoring preview + area type for polling-location videos
 // Operating principle: volunteers do not get points unless they list the submission.
 
 const wrap = document.getElementById("submissionsWrap");
@@ -10,6 +11,7 @@ const pollingFields = document.getElementById("pollingFields");
 const submissionTypeEl = document.getElementById("submissionType");
 const statusEl = document.getElementById("submissionsStatus");
 const listEl = document.getElementById("submissionsList");
+const expectedHintEl = document.getElementById("expectedHint");
 
 function h(tag, attrs = {}, children = []) {
   const el = document.createElement(tag);
@@ -64,6 +66,7 @@ function readForm() {
     submissionDate: get("submissionDate"),
     expectedPoints: get("expectedPoints"),
     pollingCounty: get("pollingCounty"),
+    pollingAreaType: get("pollingAreaType"),
     pollingName: get("pollingName"),
     claimedItems,
     notes: get("notes"),
@@ -88,17 +91,10 @@ function platformLabel(slug) {
   }
 }
 
-function getPrimaryLink(s) {
-  return (
-    s.primaryUrl ||
-    s.videoUrl || // legacy
-    s.platformLinks?.tiktok ||
-    s.platformLinks?.instagram ||
-    s.platformLinks?.facebook ||
-    s.platformLinks?.x ||
-    s.platformLinks?.bluesky ||
-    ""
-  );
+function getPrimaryLink(sub) {
+  if (sub.primaryUrl) return sub.primaryUrl;
+  const links = sub.platformLinks && typeof sub.platformLinks === "object" ? sub.platformLinks : {};
+  return links.tiktok || links.instagram || links.facebook || links.x || links.bluesky || sub.videoUrl || "";
 }
 
 function renderList(submissions = []) {
@@ -127,11 +123,15 @@ function renderList(submissions = []) {
         s.platformLinks && typeof s.platformLinks === "object"
           ? Object.entries(s.platformLinks).filter(([, url]) => Boolean(url))
           : [];
+
+      const status = s.status || "pending";
+      const points = typeof s.calculatedPoints === "number" ? s.calculatedPoints : s.expectedPoints;
+
       frag.appendChild(
         h("div", { class: "card", style: "margin-bottom:.75rem;" }, [
           h("div", { class: "spread", style: "gap:1rem; align-items:flex-start;" }, [
             h("div", {}, [
-              h("div", { class: "badge", text: "Pending review" }),
+              h("div", { class: "badge", text: status === "approved" ? "Approved" : status === "rejected" ? "Rejected" : "Pending review" }),
               h("h3", { style: "margin:.5rem 0 0 0;" }, [
                 h(
                   "a",
@@ -141,7 +141,7 @@ function renderList(submissions = []) {
               ]),
               h("div", { class: "help", style: "margin-top:.35rem;" }, [meta])
             ]),
-            h("div", { class: "badge success", text: `${s.expectedPoints ?? "?"} pts (expected)` })
+            h("div", { class: "badge success", text: `${points ?? "?"} pts (calculated)` })
           ]),
           platforms.length
             ? h(
@@ -184,27 +184,90 @@ function setTypeUI() {
   const type = submissionTypeEl?.value || "";
   const showPolling = type === "polling_location";
   pollingFields.hidden = !showPolling;
+  updateExpectedHint();
 }
 
-export function initSubmissions({ api }) {
+function countPlatforms(platformLinks) {
+  return Object.values(platformLinks || {}).filter((v) => typeof v === "string" && v.trim()).length;
+}
+
+function calcCrossPostBonus(nPlatforms) {
+  return Math.max(0, nPlatforms - 1) * 5;
+}
+
+function calcHashtagBonus(confirm) {
+  return confirm ? 2 : 0;
+}
+
+function calcBasePoints(payload) {
+  switch (payload.submissionType) {
+    case "support_chris":
+      return 25;
+    case "volunteer_event":
+      return 5;
+    case "candidate_interview":
+      return 5;
+    case "recruit_bonus":
+      return 20;
+    case "polling_location": {
+      const count = Array.isArray(payload.claimedItems) ? payload.claimedItems.length : 0;
+      const area = payload.pollingAreaType || "other";
+      const perItem = area === "little_rock" ? 2 : area === "major_city" ? 3 : 4;
+      const cap = area === "little_rock" ? 10 : area === "major_city" ? 15 : 20;
+      return Math.min(cap, count * perItem);
+    }
+    default:
+      return 0;
+  }
+}
+
+function updateExpectedHint() {
+  if (!expectedHintEl) return;
+  if (!form) return;
+
+  const payload = readForm();
+
+  const nPlatforms = countPlatforms(payload.platformLinks);
+  const cross = calcCrossPostBonus(nPlatforms);
+  const hashtag = calcHashtagBonus(payload.confirmHashtags);
+  const base = calcBasePoints(payload);
+  const calc = payload.confirmHashtags ? base + hashtag + cross : 0;
+
+  expectedHintEl.innerHTML = `
+    <span class="badge">Base: ${base}</span>
+    <span class="badge">Hashtags: ${hashtag}</span>
+    <span class="badge">Cross-post: ${cross}</span>
+    <span class="badge">Calculated: ${calc}</span>
+  `;
+
+  const expectedInput = document.getElementById("expectedPoints");
+  if (expectedInput && (!expectedInput.value || expectedInput.value === "0")) {
+    expectedInput.value = String(calc);
+  }
+}
+
+export function initSubmissions({ api, onChanged } = {}) {
   let currentTeam = null;
 
   async function load() {
     if (!currentTeam) {
       wrap.hidden = true;
+      onChanged && onChanged([]);
       return;
     }
 
     wrap.hidden = false;
-    setStatus("Loading submissions…");
+    setStatus("Loading submissions...");
     const { res, data } = await api("/.netlify/functions/submission-list");
     if (!res.ok) {
       setStatus(data?.error || "Could not load submissions.", { ok: false });
       renderList([]);
+      onChanged && onChanged([]);
       return;
     }
     setStatus("");
     renderList(data.submissions || []);
+    onChanged && onChanged(data.submissions || []);
   }
 
   async function submit(e) {
@@ -217,7 +280,7 @@ export function initSubmissions({ api }) {
     const payload = readForm();
     const btn = document.getElementById("btnSubmitVideo");
     btn.disabled = true;
-    btn.textContent = "Submitting…";
+    btn.textContent = "Submitting...";
 
     try {
       const { res, data } = await api("/.netlify/functions/submission-create", {
@@ -262,6 +325,27 @@ export function initSubmissions({ api }) {
   btnCancel?.addEventListener("click", closeForm);
   submissionTypeEl?.addEventListener("change", setTypeUI);
   form?.addEventListener("submit", submit);
+
+  // scoring preview listeners
+  [
+    "link_tiktok",
+    "link_instagram",
+    "link_facebook",
+    "link_x",
+    "link_bluesky",
+    "submissionType",
+    "pollingAreaType",
+    "confirmHashtags",
+    "pollingCounty"
+  ].forEach((id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener("input", updateExpectedHint);
+    el.addEventListener("change", updateExpectedHint);
+  });
+  document.querySelectorAll('input[name="claimedItems"]').forEach((el) => {
+    el.addEventListener("change", updateExpectedHint);
+  });
 
   return {
     setTeam(team) {

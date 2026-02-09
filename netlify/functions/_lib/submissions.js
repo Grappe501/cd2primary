@@ -82,6 +82,7 @@ export function validateSubmissionInput(input) {
   const notes = String(input.notes || "").trim();
   const pollingCounty = String(input.pollingCounty || "").trim();
   const pollingName = String(input.pollingName || "").trim();
+  const pollingAreaType = String(input.pollingAreaType || "").trim();
 
   const claimedItems = Array.isArray(input.claimedItems)
     ? input.claimedItems.map(String)
@@ -90,6 +91,9 @@ export function validateSubmissionInput(input) {
       : [];
 
   if (submissionType === "polling_location") {
+    const allowedAreas = ["little_rock","major_city","other"];
+    if (!pollingAreaType) errors.pollingAreaType = "Area type is required for polling-location videos.";
+    if (pollingAreaType && !allowedAreas.includes(pollingAreaType)) errors.pollingAreaType = "Area type must be a valid option.";
     if (!pollingCounty) errors.pollingCounty = "Polling county is required for polling-location videos.";
     if (pollingCounty && !COUNTY_OPTIONS.some((c) => c.slug === pollingCounty)) {
       errors.pollingCounty = "Polling county must be one of the official counties.";
@@ -113,10 +117,12 @@ export function validateSubmissionInput(input) {
 
   if (submissionType === "polling_location") {
     clean.pollingCounty = pollingCounty;
+    clean.pollingAreaType = pollingAreaType;
     clean.pollingName = pollingName || "";
     clean.claimedItems = claimedItems;
   } else {
     clean.pollingCounty = pollingCounty || "";
+    clean.pollingAreaType = "";
     clean.pollingName = pollingName || "";
     clean.claimedItems = [];
   }

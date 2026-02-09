@@ -34,6 +34,8 @@
               <p class="lede" style="margin: .5rem 0 0 0;">
                 This is your official team profile. All submissions and points are tied to this page.
               </p>
+              <div id="scoreBox" style="margin-top:1rem;"></div>
+
             </div>
             <div class="row" style="flex-wrap:wrap;">
               <button class="btn" id="btnAccount" type="button">Account</button>
@@ -190,6 +192,8 @@
                         <label class="label" for="expectedPoints" style="margin-top:.75rem;">Expected Points (what you believe you earned)</label>
                         <input class="input" id="expectedPoints" name="expectedPoints" type="number" min="0" step="1" required />
                         <div class="help" id="err_expectedPoints"></div>
+                        <div id="expectedHint" class="help" style="margin-top:.35rem;"></div>
+
                       </div>
 
                       <div>
@@ -207,6 +211,15 @@
                             <option value="white">White</option>
                           </select>
                           <div class="help" id="err_pollingCounty"></div>
+
+                          <label class="label" for="pollingAreaType" style="margin-top:.75rem;">Polling Location Area Type</label>
+                          <select class="input" id="pollingAreaType" name="pollingAreaType">
+                            <option value="">Select an area type…</option>
+                            <option value="little_rock">Little Rock</option>
+                            <option value="major_city">City limits (Searcy, Conway, Bryant, Benton, Sherwood, Jacksonville, Maumelle)</option>
+                            <option value="other">All other locations</option>
+                          </select>
+                          <div class="help" id="err_pollingAreaType"></div>
 
                           <label class="label" for="pollingName" style="margin-top:.75rem;">Polling Location Name (as written on site)</label>
                           <input class="input" id="pollingName" name="pollingName" />

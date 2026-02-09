@@ -1,37 +1,25 @@
-# Overlay 08 (Update) — Cross-Post Platform Bonus
+# Overlay 09 – Scoring Engine
 
-**Goal:** Expand submissions to support multiple social platforms (TikTok, Instagram, Facebook, X, Bluesky) and document the **+5 points per additional platform cross-posted** bonus.
-
-This overlay update:
-- Updates rules + one-page handout
-- Updates the Team Profile submissions form + validation
-- Stores platform links per submission so future scoring/admin review can verify exactly what the team claimed
+## Goal
+Introduce a deterministic, auditable scoring engine that computes points from what teams actually submit, while keeping the system aligned with the “No Confusion Policy” (teams only earn what they list).
 
 ## What changed
+- **Server-side scoring library**: `netlify/functions/_lib/scoring.js` (versioned).
+- **Score endpoint**: `/.netlify/functions/score-get` returns:
+  - Official points (approved submissions only)
+  - Provisional points (includes pending)
+  - 8-county sweep bonus (+50) applied to official score only
+- **Polling-location area type** added to submissions:
+  - `little_rock` (2 pts/item, cap 10)
+  - `major_city` (3 pts/item, cap 15)
+  - `other` (4 pts/item, cap 20)
+- `submission-create` now stores computed fields (`basePoints`, `hashtagBonus`, `crossPostBonus`, `calculatedPoints`, `platformCount`).
+- `submission-list` backfills computed fields for older submissions.
+- Team Profile UI now:
+  - shows a score summary card
+  - shows calculated points for each submission
+  - provides a live “expected points” preview while filling the submission form
 
-### Rules + handout
-- Added a **Cross-Post Platform Bonus** section.
-- Clarified that teams may submit to **any** supported platform(s) and must paste the public links they are claiming.
-
-### Submissions (client)
-- Submission form now accepts **multiple links** (one per platform).
-- Submission list shows **platform badges** linking directly to each platform post.
-
-### Submissions (functions)
-- Validation now requires **at least one public link** across the supported platforms.
-- Stores:
-  - `platformLinks` object (per-platform urls)
-  - `primaryUrl` derived for convenience (used for “Open submitted link”)
-
-## Files changed
-- `MASTER_BUILD_PLAN.md`
-- `CHANGELOG.md`
-- `src/rules/index.html`
-- `src/handout/index.html`
-- `src/app/profile/index.html`
-- `src/assets/js/submissions.js`
-- `netlify/functions/_lib/submissions.js`
-
-## Non-goals
-- No admin tooling
-- No scoring engine changes yet (expected points is still team-entered)
+## Notes
+- Admin review is still a future overlay, so **all new submissions remain `pending`** and official score will be 0 until approvals exist.
+- Leaderboard remains mock/live swap happens in later overlays per `MASTER_BUILD_PLAN.md`.
