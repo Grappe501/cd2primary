@@ -45,3 +45,8 @@
 - Switched to campaign-style palette (warm cream background, deep navy primary, orange accents)
 - Set sensible global defaults (body background/text, links, focus rings, headings)
 - Improved contrast on cards, buttons, nav, and form fields
+
+## Overlay 08 (Update)
+- Added cross-post platform support for submissions (TikTok / Instagram / Facebook / X / Bluesky)
+- Updated rules + handout to define +5 bonus per additional platform cross-posted
+- Updated submission validation and list rendering to handle multiple platform links

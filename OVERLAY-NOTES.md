@@ -1,36 +1,37 @@
-# Overlay 08 — Brand & Readability Upgrade
+# Overlay 08 (Update) — Cross-Post Platform Bonus
 
-**Goal:** Fix readability issues (low contrast / washed text) and shift the entire UI to match the **Chris Jones for Congress** brand vibe.
+**Goal:** Expand submissions to support multiple social platforms (TikTok, Instagram, Facebook, X, Bluesky) and document the **+5 points per additional platform cross-posted** bonus.
 
-This overlay focuses **only** on styling. No logic, scoring, submissions, or admin changes.
+This overlay update:
+- Updates rules + one-page handout
+- Updates the Team Profile submissions form + validation
+- Stores platform links per submission so future scoring/admin review can verify exactly what the team claimed
 
 ## What changed
 
-### Design tokens
-- Replaced the previous dark/low-contrast token set with a campaign-style palette:
-  - Warm cream background
-  - Deep navy primary
-  - Orange accent
-- Updated shadows, borders, and muted text to remain readable on light surfaces.
+### Rules + handout
+- Added a **Cross-Post Platform Bonus** section.
+- Clarified that teams may submit to **any** supported platform(s) and must paste the public links they are claiming.
 
-### Base styles
-- Added missing global defaults that were causing the “light gray on white” problem:
-  - `body` background + text color
-  - Typography + spacing defaults
-  - Strong, visible focus rings (keyboard accessible)
+### Submissions (client)
+- Submission form now accepts **multiple links** (one per platform).
+- Submission list shows **platform badges** linking directly to each platform post.
 
-### Components
-- Updated nav, cards, buttons, badges, and form fields to match the new palette.
-- Tightened hover + active states so everything reads clearly.
+### Submissions (functions)
+- Validation now requires **at least one public link** across the supported platforms.
+- Stores:
+  - `platformLinks` object (per-platform urls)
+  - `primaryUrl` derived for convenience (used for “Open submitted link”)
 
 ## Files changed
-- `src/assets/css/tokens.css`
-- `src/assets/css/base.css`
-- `src/assets/css/components.css`
+- `MASTER_BUILD_PLAN.md`
 - `CHANGELOG.md`
+- `src/rules/index.html`
+- `src/handout/index.html`
+- `src/app/profile/index.html`
+- `src/assets/js/submissions.js`
+- `netlify/functions/_lib/submissions.js`
 
 ## Non-goals
-- No new pages
-- No scoring logic
 - No admin tooling
-- No changes to storage or functions
+- No scoring engine changes yet (expected points is still team-entered)

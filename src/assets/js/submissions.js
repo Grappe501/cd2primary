@@ -48,8 +48,18 @@ function readForm() {
   const fd = new FormData(form);
   const get = (k) => String(fd.get(k) || "").trim();
   const claimedItems = fd.getAll("claimedItems").map(String);
+  const platformLinks = {
+    tiktok: get("link_tiktok"),
+    instagram: get("link_instagram"),
+    facebook: get("link_facebook"),
+    x: get("link_x"),
+    bluesky: get("link_bluesky")
+  };
+  // primaryUrl is optional; server will derive one if missing.
+  const primaryUrl = get("primaryUrl");
   return {
-    videoUrl: get("videoUrl"),
+    platformLinks,
+    primaryUrl,
     submissionType: get("submissionType"),
     submissionDate: get("submissionDate"),
     expectedPoints: get("expectedPoints"),
@@ -59,6 +69,36 @@ function readForm() {
     notes: get("notes"),
     confirmHashtags: fd.get("confirmHashtags") === "on"
   };
+}
+
+function platformLabel(slug) {
+  switch (slug) {
+    case "tiktok":
+      return "TikTok";
+    case "instagram":
+      return "Instagram";
+    case "facebook":
+      return "Facebook";
+    case "x":
+      return "X";
+    case "bluesky":
+      return "Bluesky";
+    default:
+      return slug;
+  }
+}
+
+function getPrimaryLink(s) {
+  return (
+    s.primaryUrl ||
+    s.videoUrl || // legacy
+    s.platformLinks?.tiktok ||
+    s.platformLinks?.instagram ||
+    s.platformLinks?.facebook ||
+    s.platformLinks?.x ||
+    s.platformLinks?.bluesky ||
+    ""
+  );
 }
 
 function renderList(submissions = []) {
@@ -82,18 +122,46 @@ function renderList(submissions = []) {
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     .forEach((s) => {
       const meta = `${new Date(s.createdAt).toLocaleString()} • ${s.submissionTypeLabel || s.submissionType}`;
+      const primary = getPrimaryLink(s);
+      const platforms =
+        s.platformLinks && typeof s.platformLinks === "object"
+          ? Object.entries(s.platformLinks).filter(([, url]) => Boolean(url))
+          : [];
       frag.appendChild(
         h("div", { class: "card", style: "margin-bottom:.75rem;" }, [
           h("div", { class: "spread", style: "gap:1rem; align-items:flex-start;" }, [
             h("div", {}, [
               h("div", { class: "badge", text: "Pending review" }),
               h("h3", { style: "margin:.5rem 0 0 0;" }, [
-                h("a", { href: s.videoUrl, target: "_blank", rel: "noopener" }, ["Open video link"])
+                h(
+                  "a",
+                  { href: primary || "#", target: "_blank", rel: "noopener" },
+                  [primary ? "Open submitted link" : "Link missing"]
+                )
               ]),
               h("div", { class: "help", style: "margin-top:.35rem;" }, [meta])
             ]),
             h("div", { class: "badge success", text: `${s.expectedPoints ?? "?"} pts (expected)` })
           ]),
+          platforms.length
+            ? h(
+                "div",
+                { class: "row", style: "margin-top:.6rem; flex-wrap:wrap; gap:.35rem;" },
+                platforms.map(([slug, url]) =>
+                  h(
+                    "a",
+                    {
+                      class: "badge",
+                      href: url,
+                      target: "_blank",
+                      rel: "noopener",
+                      title: `Open on ${platformLabel(slug)}`
+                    },
+                    [platformLabel(slug)]
+                  )
+                )
+              )
+            : null,
           s.pollingCounty || s.pollingName
             ? h("div", { class: "help", style: "margin-top:.5rem;" }, [
                 `${s.pollingCounty ? `County: ${s.pollingCounty}` : ""}${s.pollingCounty && s.pollingName ? " • " : ""}${s.pollingName ? `Location: ${s.pollingName}` : ""}`
@@ -182,7 +250,7 @@ export function initSubmissions({ api }) {
   function openForm() {
     formWrap.hidden = false;
     setTypeUI();
-    document.getElementById("videoUrl")?.focus();
+    document.getElementById("link_tiktok")?.focus();
   }
 
   function closeForm() {

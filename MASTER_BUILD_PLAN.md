@@ -64,16 +64,27 @@ Overlay 04 – Leaderboard (Mock)
 Overlay 05 – Authentication  
 Overlay 06 – Team Profiles  
 Overlay 07 – Submissions  
-Overlay 08 – Scoring Engine  
-Overlay 09 – Admin Auth  
-Overlay 10 – Admin Review  
-Overlay 11 – Live Leaderboard  
-Overlay 12 – Admin CRUD  
-Overlay 13 – County Data  
-Overlay 14 – Prizes  
-Overlay 15 – Volunteer Verification  
-Overlay 16 – Moderation  
-Overlay 17 – Launch Polish
+Overlay 08 – Brand & Accessibility Refresh  
+Overlay 09 – Scoring Engine  
+Overlay 10 – Admin Auth  
+Overlay 11 – Admin Review  
+Overlay 12 – Live Leaderboard  
+Overlay 13 – Admin CRUD  
+Overlay 14 – County Data  
+Overlay 15 – Prizes  
+Overlay 16 – Volunteer Verification  
+Overlay 17 – Moderation  
+Overlay 18 – Launch Polish
+
+---
+
+## Rule Update: Cross-Post Platform Bonus
+
+Teams may submit the same content to one or more social platforms (TikTok, Instagram, Facebook, X, Bluesky).
+
+* Bonus: **+5 points per additional platform cross-posted** for the same content.
+* Submissions must include the public link(s) the team is claiming.
+* This bonus is still subject to the universal rules: required hashtags, public link, submitted through the Team Profile.
 
 ---
 

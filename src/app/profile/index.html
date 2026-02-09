@@ -148,9 +148,28 @@
                   <form id="submissionForm">
                     <div class="grid cols-2" style="align-items:start;">
                       <div>
-                        <label class="label" for="videoUrl">Video Link (public)</label>
-                        <input class="input" id="videoUrl" name="videoUrl" placeholder="https://www.tiktok.com/..." required />
-                        <div class="help" id="err_videoUrl"></div>
+                        <h3 style="margin:.25rem 0 .5rem 0;">Platforms & Links</h3>
+                        <p class="help" style="margin-top:0;">
+                          Submit to <strong>TikTok</strong>, <strong>Instagram</strong>, <strong>Facebook</strong>, <strong>X</strong>, or <strong>Bluesky</strong> — your choice.
+                          <strong>Cross-post bonus:</strong> +5 expected points for each additional platform you posted on.
+                        </p>
+
+                        <label class="label" for="link_tiktok">TikTok link (optional)</label>
+                        <input class="input" id="link_tiktok" name="link_tiktok" placeholder="https://www.tiktok.com/..." />
+
+                        <label class="label" for="link_instagram" style="margin-top:.5rem;">Instagram link (optional)</label>
+                        <input class="input" id="link_instagram" name="link_instagram" placeholder="https://www.instagram.com/reel/..." />
+
+                        <label class="label" for="link_facebook" style="margin-top:.5rem;">Facebook link (optional)</label>
+                        <input class="input" id="link_facebook" name="link_facebook" placeholder="https://www.facebook.com/..." />
+
+                        <label class="label" for="link_x" style="margin-top:.5rem;">X (Twitter) link (optional)</label>
+                        <input class="input" id="link_x" name="link_x" placeholder="https://x.com/..." />
+
+                        <label class="label" for="link_bluesky" style="margin-top:.5rem;">Bluesky link (optional)</label>
+                        <input class="input" id="link_bluesky" name="link_bluesky" placeholder="https://bsky.app/profile/..." />
+
+                        <div class="help" id="err_platformLinks" style="margin-top:.35rem;"></div>
 
                         <label class="label" for="submissionType" style="margin-top:.75rem;">Submission Type</label>
                         <select class="input" id="submissionType" name="submissionType" required>

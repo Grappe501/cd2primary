@@ -28,14 +28,35 @@ export function validateSubmissionInput(input) {
   const errors = {};
   const clean = {};
 
-  const videoUrl = String(input.videoUrl || "").trim();
+  // Cross-post support (TikTok, Instagram, Facebook, X, Bluesky)
+  // Teams may submit to any platform and earn +5 expected bonus points per additional platform.
+  const rawLinks = input.platformLinks && typeof input.platformLinks === "object" ? input.platformLinks : {};
+  const allowedPlatforms = ["tiktok", "instagram", "facebook", "x", "bluesky"];
+  const platformLinks = {};
+  for (const p of allowedPlatforms) {
+    const v = String(rawLinks[p] || "").trim();
+    if (v) platformLinks[p] = v;
+  }
+  const primaryUrl = String(input.primaryUrl || "").trim();
+  // Back-compat: allow old clients sending videoUrl
+  const legacyVideoUrl = String(input.videoUrl || "").trim();
   const submissionType = String(input.submissionType || "").trim();
   const submissionDate = String(input.submissionDate || "").trim();
   const expectedPointsRaw = String(input.expectedPoints || "").trim();
   const confirmHashtags = Boolean(input.confirmHashtags);
 
-  if (!videoUrl) errors.videoUrl = "Video link is required.";
-  if (videoUrl && !/^https?:\/\//i.test(videoUrl)) errors.videoUrl = "Please paste a full http(s) link.";
+  const linkCount = Object.keys(platformLinks).length;
+  const effectivePrimary = primaryUrl || platformLinks.tiktok || platformLinks.instagram || platformLinks.facebook || platformLinks.x || platformLinks.bluesky || legacyVideoUrl;
+
+  if (!linkCount && !effectivePrimary) {
+    errors.platformLinks = "Paste at least one public link (TikTok, Instagram, Facebook, X, or Bluesky).";
+  }
+
+  // Validate all provided links
+  const toValidate = linkCount ? Object.values(platformLinks) : (effectivePrimary ? [effectivePrimary] : []);
+  if (toValidate.some((u) => u && !/^https?:\/\//i.test(u))) {
+    errors.platformLinks = "Please paste full http(s) links for each platform.";
+  }
 
   if (!submissionType) errors.submissionType = "Submission type is required.";
   if (submissionType && !SUBMISSION_TYPES.some((t) => t.slug === submissionType)) {
@@ -81,7 +102,8 @@ export function validateSubmissionInput(input) {
   const ok = Object.keys(errors).length === 0;
   if (!ok) return { ok, errors };
 
-  clean.videoUrl = videoUrl;
+  clean.platformLinks = platformLinks;
+  clean.primaryUrl = effectivePrimary;
   clean.submissionType = submissionType;
   clean.submissionTypeLabel = SUBMISSION_TYPES.find((t) => t.slug === submissionType)?.label || submissionType;
   clean.submissionDate = submissionDate;
