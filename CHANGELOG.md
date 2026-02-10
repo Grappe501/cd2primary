@@ -69,3 +69,12 @@
 - Added admin approve/reject function (admin-submission-update)
 - Added minimal audit trail records for each review action
 - Added internal teams index to support admin browse without a database
+
+## Overlay 12
+- Switched public leaderboard and landing Top Teams to live data via leaderboard-get (with mock fallback)
+- Added admin exports (CSV/JSON) for teams + submissions
+- Added admin audit viewer (reads audit entries per submission)
+
+## Overlay 12 (Hotfix)
+- Restored deterministic build output by adding a build script that copies src/ → dist/
+- Updated netlify.toml to publish dist/ and run npm run build so assets (CSS/JS) always deploy with HTML

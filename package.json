@@ -2,6 +2,9 @@
   "name": "ar-02-scavenger-hunt",
   "private": true,
   "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs"
+  },
   "dependencies": {
     "@netlify/blobs": "latest"
   }
