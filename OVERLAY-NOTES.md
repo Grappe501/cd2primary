@@ -1,20 +1,35 @@
-# Overlay 09 (Update) – Scoring Engine Completeness Patch
+# Overlay 10 – Admin Auth
 
 ## Goal
-Finish the scoring engine so it matches the published rules more closely before we move on to admin overlays.
+Gate `/admin/*` behind Netlify Identity **and** a server-enforced admin allowlist so we can safely add approval tooling in Overlay 11.
 
-## What changed
-- Added **posting streak bonus** to the official score calculation (approved submissions only):
-  - 3-day: +10
-  - 5-day: +25
-  - 7-day: +40
-  - 10-day: +60
-  - Conservative interpretation: **highest milestone only** (not cumulative).
-- Enforced **cap** for “Why I Support Chris Jones” submissions:
-  - Max **2** counted (anything beyond is scored as 0, marked `capBlocked: true` in the score summary).
-- Score API now returns `postingStreakBonus` in the breakdown.
-- Team Profile score card now displays the streak bonus.
+This overlay intentionally **does not** add any scoring changes or admin tooling beyond the access foundation.
+
+## What’s included
+- `src/admin/index.html` — Admin landing page (login + authorization checks)
+- `src/assets/js/admin.js` — client helper that verifies admin access via a function
+- `netlify/functions/admin-whoami.js` — returns `{ isAdmin }` for the current authenticated user
+- `netlify/functions/_lib/admin.js` — shared admin allowlist logic
+- `admin-notes/admin-access.md` — setup instructions for Netlify site settings
+- Updated `CHANGELOG.md`
+
+## Admin allowlist
+Admins are controlled by the Netlify environment variable:
+
+- `ADMIN_EMAILS` — comma-separated list of authorized admin emails (case-insensitive)
+
+Example:
+```
+ADMIN_EMAILS=alice@example.com,bob@example.com
+```
+
+If `ADMIN_EMAILS` is not set, **no one** is treated as admin.
+
+## Acceptance checklist
+- Logged-out users visiting `/admin/` see a login prompt
+- Logged-in non-admin users see a clear “Not authorized” message
+- Logged-in admin users see the Admin Dashboard stub
+- The server (function) enforces admin status — client-side checks are not relied upon
 
 ## Notes
-- Distance/Coverage bonus is still not computable because the rules do not specify point values yet.
-- Admin review is still a future overlay, so official points remain dependent on approvals.
+This overlay only establishes the gate. Overlay 11 will add review/approval UI and functions.

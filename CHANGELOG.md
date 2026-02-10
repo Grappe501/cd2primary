@@ -58,8 +58,7 @@
 - Team Profile now displays score summary card and shows calculated points per submission
 - Added client-side scoring preview to help teams estimate expected points consistently
 
-## Overlay 09 (Update)
-- Added posting streak bonus computation (official score only; highest milestone only)
-- Enforced cap on “Why I Support Chris Jones” (max 2 counted)
-- Score API now returns streak bonus and capBlocked flags
-- Team Profile score card now displays streak bonus
+## Overlay 10
+- Added /admin/ area gated by Netlify Identity + admin allowlist
+- Added admin status function (admin-whoami) for server-side enforcement
+- Added admin setup notes (ADMIN_EMAILS) for Netlify site configuration

@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="/assets/css/site.css" />
+    <title>Admin • AR-02 #PrimaryVote! Scavenger Hunt</title>
+    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+  </head>
+  <body>
+
+    <header class="nav">
+      <div class="container nav-inner spread">
+        <a class="brand" href="/">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <span>AR-02 #PrimaryVote! Scavenger Hunt</span>
+        </a>
+        <nav class="nav-links" aria-label="Primary">
+          <a href="/rules/">Rules</a>
+          <a href="/handout/">Handout</a>
+          <a href="/counties/">Counties</a>
+          <a href="/leaderboard/">Leaderboard</a>
+          <a class="btn" href="/app/profile/">Team Profile</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="section" style="padding-top: 2rem;">
+        <div class="card">
+          <h1 style="margin-top:0;">Admin</h1>
+          <p class="lede">
+            This area is restricted. Admin access is enforced by Netlify Identity + a server allowlist.
+          </p>
+
+          <div class="row" style="margin-top: 1rem; flex-wrap: wrap;">
+            <button class="btn primary" id="btnOpen" type="button">Open Sign In</button>
+            <button class="btn" id="btnLogout" type="button" hidden>Log out</button>
+            <a class="btn" href="/">Back to site</a>
+          </div>
+
+          <hr class="hr" />
+
+          <div id="status" class="badge" aria-live="polite">Checking login status…</div>
+
+          <div id="notAuthorized" class="card" style="margin-top: 1rem;" hidden>
+            <h2 style="margin-top:0;">Not authorized</h2>
+            <p style="margin-bottom:0;">
+              If you believe you should have access, ask a site admin to add your email to the Netlify environment variable
+              <code>ADMIN_EMAILS</code>.
+            </p>
+          </div>
+
+          <div id="adminConfigHint" class="card" style="margin-top: 1rem;" hidden>
+            <h2 style="margin-top:0;">Admin allowlist not configured</h2>
+            <p style="margin-bottom:0;">
+              Set <code>ADMIN_EMAILS</code> in Netlify → Site configuration → Environment variables.
+              See <code>admin-notes/admin-access.md</code> in the repo for exact steps.
+            </p>
+          </div>
+
+          <div id="adminPanel" class="card" style="margin-top: 1rem;" hidden>
+            <h2 style="margin-top:0;">Admin Dashboard (stub)</h2>
+            <p class="lede">
+              Overlay 11 will add review + approval tooling here. For now, this page confirms access is correctly gated.
+            </p>
+            <ul>
+              <li>Review queue (coming in Overlay 11)</li>
+              <li>Approve / reject submissions (coming in Overlay 11)</li>
+              <li>Audit trail exports (coming in Overlay 12)</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="container spread">
+        <div>
+          <div><strong>Chris Jones for Congress</strong></div>
+          <small>AR-02 #PrimaryVote! Scavenger Hunt • Feb 13 – Mar 3, 2026</small>
+        </div>
+        <div class="row">
+          <a href="/rules/">Rules</a>
+          <a href="/leaderboard/">Leaderboard</a>
+          <a href="/counties/">Counties</a>
+        </div>
+      </div>
+    </footer>
+
+    <script type="module" src="/assets/js/admin.js"></script>
+  </body>
+</html>
