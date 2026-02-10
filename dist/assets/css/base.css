@@ -1,0 +1,41 @@
+/* Base styles (brand + accessibility first) */
+
+*{ box-sizing: border-box; }
+
+html{ scroll-behavior: smooth; }
+
+body{
+  margin: 0;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.55;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+img{ max-width: 100%; height: auto; }
+
+a{ color: var(--primary); text-decoration: none; }
+a:hover{ text-decoration: underline; }
+
+/* Focus rings that are hard to miss */
+:focus{ outline: none; }
+:focus-visible{
+  outline: 3px solid rgba(230,160,75,.65);
+  outline-offset: 3px;
+}
+
+/* Typography */
+h1,h2,h3{ line-height: 1.12; letter-spacing: -0.02em; margin: 0 0 .6rem; }
+h1{ font-size: var(--h1); }
+h2{ font-size: var(--h2); }
+
+p{ margin: 0 0 1rem; }
+
+/* Simple “content” defaults */
+main{ min-height: 60vh; }
+
+/* Small utility */
+.muted{ color: var(--muted); }

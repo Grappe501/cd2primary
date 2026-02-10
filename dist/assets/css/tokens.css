@@ -1,0 +1,53 @@
+/*
+  Design tokens (campaign-branded).
+
+  Goals:
+  - High contrast by default (AA-ish without relying on perfect markup).
+  - Match Chris Jones campaign vibe: warm cream + deep navy + orange accent.
+  - Keep everything simple + inspectable (no frameworks).
+
+  NOTE: Exact hex values are approximated from campaign visuals.
+*/
+:root{
+  --container: 1120px;
+
+  /* Brand palette */
+  --navy: #1f3a66;
+  --navy-2: #14284a;
+  --orange: #e6a04b;
+  --orange-2: #d98624;
+  --cream: #fff7ee;
+  --white: #ffffff;
+
+  /* Surfaces */
+  --bg: var(--cream);
+  --surface: var(--white);
+  --surface-2: #fff1df;
+
+  /* Type */
+  --text: #0b1a33;     /* ink */
+  --muted: #425066;    /* readable muted */
+
+  /* Semantic */
+  --primary: var(--navy);
+  --accent: var(--orange);
+  --accent-2: #2a9d8f; /* supporting accent (teal-ish) */
+
+  --border: rgba(31,58,102,.14);
+
+  --radius: 18px;
+  --radius-sm: 12px;
+
+  --shadow: 0 18px 50px rgba(20,40,74,.12);
+
+  --space-1: .5rem;
+  --space-2: .75rem;
+  --space-3: 1rem;
+  --space-4: 1.25rem;
+  --space-5: 1.75rem;
+  --space-6: 2.25rem;
+
+  --h1: clamp(2rem, 3.5vw, 3.2rem);
+  --h2: clamp(1.25rem, 2vw, 1.85rem);
+  --lede: 1.1rem;
+}

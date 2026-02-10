@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Leaderboard • #PrimaryVote! CD2</title>
+  <link rel="stylesheet" href="/assets/css/styles.css" />
+</head>
+<body class="cj-page">
+  <header class="cj-header">
+    <div class="cj-container">
+      <a class="cj-brand" href="/">#PrimaryVote! CD2</a>
+      <nav class="cj-nav">
+        <a href="/rules/">Rules</a>
+        <a href="/counties/">Counties</a>
+        <a href="/leaderboard/" class="is-active">Leaderboard</a>
+        <a href="/app/">Team Portal</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="cj-container cj-main">
+    <div class="cj-hero cj-hero--compact">
+      <h1 class="cj-h1">Leaderboard</h1>
+      <p class="cj-muted">Official score = approved submissions. Provisional score includes pending submissions.</p>
+      <p class="cj-muted" data-leaderboard-status></p>
+    </div>
+
+    <section class="cj-card">
+      <div class="cj-card__body">
+        <div class="cj-row cj-row--between cj-row--wrap cj-gap-2">
+          <input class="cj-input" type="search" placeholder="Search teams or counties…" data-leaderboard-search />
+          <select class="cj-select" data-leaderboard-sort>
+            <option value="official_desc">Sort: Official (high → low)</option>
+            <option value="provisional_desc">Sort: Provisional (high → low)</option>
+            <option value="name_asc">Sort: Team name (A → Z)</option>
+            <option value="county_asc">Sort: County (A → Z)</option>
+          </select>
+        </div>
+
+        <div class="cj-table-wrap cj-mt-3">
+          <table class="cj-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Team</th>
+                <th>Home County</th>
+                <th>Official</th>
+                <th>Provisional</th>
+                <th>Approved</th>
+                <th>Pending</th>
+              </tr>
+            </thead>
+            <tbody data-leaderboard-body>
+              <tr><td colspan="7" class="cj-muted">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="cj-footer">
+    <div class="cj-container">
+      <p class="cj-muted">Campaign-sanctioned volunteer game. Keep it fair. Keep it fun.</p>
+    </div>
+  </footer>
+
+  <!-- Optional mock fallback script may already exist in repo; keep it if present -->
+  <script src="/assets/js/leaderboard.mock.js"></script>
+  <script src="/assets/js/leaderboard.live.js"></script>
+</body>
+</html>

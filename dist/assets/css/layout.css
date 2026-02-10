@@ -1,0 +1,25 @@
+/* Layout + utilities */
+.container{
+  width: min(var(--container), calc(100% - 2rem));
+  margin-inline: auto;
+}
+
+.section{ padding: 3rem 0; }
+
+.grid{
+  display: grid;
+  gap: var(--space-4);
+}
+
+.grid.cols-3{
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+@media (max-width: 900px){
+  .grid.cols-3{ grid-template-columns: 1fr; }
+}
+
+.stack{ display:flex; flex-direction:column; gap: var(--space-3); }
+.row{ display:flex; gap: var(--space-3); align-items:center; flex-wrap:wrap; }
+.spread{ display:flex; gap: var(--space-3); align-items:center; justify-content:space-between; flex-wrap:wrap; }
+
+.hr{ height:1px; background: var(--border); margin: var(--space-5) 0; border:0; }

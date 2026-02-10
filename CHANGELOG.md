@@ -78,3 +78,9 @@
 ## Overlay 12 (Hotfix)
 - Restored deterministic build output by adding a build script that copies src/ → dist/
 - Updated netlify.toml to publish dist/ and run npm run build so assets (CSS/JS) always deploy with HTML
+
+
+## Overlay 13
+- Hotfix: added /assets/css/styles.css entrypoint (imports site.css)
+- Added legacy CJ class compatibility layer so landing/leaderboard/admin render styled
+- Appended stabilization overlay track plan (Overlays 13–17)
