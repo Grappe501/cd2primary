@@ -62,3 +62,10 @@
 - Added /admin/ area gated by Netlify Identity + admin allowlist
 - Added admin status function (admin-whoami) for server-side enforcement
 - Added admin setup notes (ADMIN_EMAILS) for Netlify site configuration
+
+## Overlay 11
+- Added admin review queue UI on /admin/ (filter: pending/approved/rejected/all)
+- Added admin submissions listing function (admin-submissions-list)
+- Added admin approve/reject function (admin-submission-update)
+- Added minimal audit trail records for each review action
+- Added internal teams index to support admin browse without a database

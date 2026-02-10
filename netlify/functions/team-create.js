@@ -1,5 +1,6 @@
 import { getStore } from "@netlify/blobs";
 import { json, requireUser, validateTeamInput } from "./_lib/team.js";
+import { upsertTeamsIndexItem } from "./_lib/teamsIndex.js";
 
 export default async (req, context) => {
   if (req.method !== "POST") {
@@ -54,6 +55,15 @@ export default async (req, context) => {
     await store.delete(teamKey);
     return json(409, { error: "Team already exists for this user." });
   }
+
+  // Update admin-friendly team index.
+  await upsertTeamsIndexItem(store, {
+    teamId,
+    teamName: team.teamName,
+    homeCounty: team.homeCounty,
+    createdAt: team.createdAt,
+    ownerEmail: team.ownerEmail
+  });
 
   return json(201, { team });
 };

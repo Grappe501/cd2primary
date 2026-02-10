@@ -1,5 +1,6 @@
 import { getStore } from "@netlify/blobs";
 import { json, requireUser, validateTeamInput } from "./_lib/team.js";
+import { upsertTeamsIndexItem } from "./_lib/teamsIndex.js";
 
 export default async (req, context) => {
   if (req.method !== "PUT" && req.method !== "PATCH") {
@@ -46,5 +47,12 @@ export default async (req, context) => {
   };
 
   await store.setJSON(teamKey, updated);
+  await upsertTeamsIndexItem(store, {
+    teamId: updated.teamId,
+    teamName: updated.teamName,
+    homeCounty: updated.homeCounty,
+    createdAt: updated.createdAt,
+    ownerEmail: updated.ownerEmail
+  });
   return json(200, { team: updated });
 };

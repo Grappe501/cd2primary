@@ -60,15 +60,62 @@
           </div>
 
           <div id="adminPanel" class="card" style="margin-top: 1rem;" hidden>
-            <h2 style="margin-top:0;">Admin Dashboard (stub)</h2>
-            <p class="lede">
-              Overlay 11 will add review + approval tooling here. For now, this page confirms access is correctly gated.
-            </p>
-            <ul>
-              <li>Review queue (coming in Overlay 11)</li>
-              <li>Approve / reject submissions (coming in Overlay 11)</li>
-              <li>Audit trail exports (coming in Overlay 12)</li>
-            </ul>
+            <div class="spread" style="align-items:flex-start; gap:1rem; flex-wrap:wrap;">
+              <div>
+                <h2 style="margin-top:0;">Review & Approvals</h2>
+                <p class="lede" style="margin-bottom:0;">
+                  Approve or reject submissions. Only <strong>approved</strong> submissions count toward <strong>official</strong> points.
+                </p>
+              </div>
+              <div class="row" style="gap:.5rem; flex-wrap:wrap; justify-content:flex-end;">
+                <label class="field" style="min-width: 220px;">
+                  <span class="label">Status</span>
+                  <select id="filterStatus" class="input">
+                    <option value="pending" selected>Pending</option>
+                    <option value="approved">Approved</option>
+                    <option value="rejected">Rejected</option>
+                    <option value="all">All</option>
+                  </select>
+                </label>
+                <label class="field" style="min-width: 260px;">
+                  <span class="label">Search</span>
+                  <input id="filterSearch" class="input" type="search" placeholder="Team, member, or submission id" />
+                </label>
+                <button class="btn" id="btnRefresh" type="button">Refresh</button>
+              </div>
+            </div>
+
+            <hr class="hr" />
+
+            <div id="queueMeta" class="badge" aria-live="polite">Loading queue…</div>
+
+            <div style="overflow:auto; margin-top: .75rem;">
+              <table class="table" style="width:100%; min-width: 980px;">
+                <thead>
+                  <tr>
+                    <th style="text-align:left;">Team</th>
+                    <th style="text-align:left;">Type</th>
+                    <th style="text-align:left;">Posted</th>
+                    <th style="text-align:left;">Links</th>
+                    <th style="text-align:left;">Points</th>
+                    <th style="text-align:left;">Status</th>
+                    <th style="text-align:left;">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="queueBody">
+                  <tr><td colspan="7"><em>Loading…</em></td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <details style="margin-top: 1rem;">
+              <summary><strong>Notes</strong></summary>
+              <ul>
+                <li>Approving a submission immediately affects <strong>official</strong> points.</li>
+                <li>Hashtags are a hard gate: if a team did not confirm required hashtags, calculated points are 0.</li>
+                <li>"Why I Support Chris Jones" is capped at <strong>2 counted videos</strong>; extra submissions may be approved but can score 0 due to caps.</li>
+              </ul>
+            </details>
           </div>
         </div>
       </section>
