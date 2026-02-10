@@ -57,3 +57,9 @@
 - Added score API (/.netlify/functions/score-get) returning official vs provisional totals and 8-county sweep bonus (official only)
 - Team Profile now displays score summary card and shows calculated points per submission
 - Added client-side scoring preview to help teams estimate expected points consistently
+
+## Overlay 09 (Update)
+- Added posting streak bonus computation (official score only; highest milestone only)
+- Enforced cap on “Why I Support Chris Jones” (max 2 counted)
+- Score API now returns streak bonus and capBlocked flags
+- Team Profile score card now displays streak bonus

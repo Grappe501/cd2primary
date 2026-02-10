@@ -95,7 +95,7 @@ function renderScore(score) {
   scoreBox.innerHTML = `
     <div class="card" style="margin-top:1rem;">
       <h3 style="margin:0 0 .5rem 0;">Score</h3>
-      <div class="grid" style="grid-template-columns: repeat(3, minmax(0,1fr)); gap:.75rem;">
+      <div class="grid" style="grid-template-columns: repeat(4, minmax(0,1fr)); gap:.75rem;">
         <div class="card" style="padding:.75rem; margin:0;">
           <div class="help">Official (approved)</div>
           <div style="font-size:1.5rem;"><strong>${esc(score.officialPoints)}</strong></div>
@@ -103,6 +103,10 @@ function renderScore(score) {
         <div class="card" style="padding:.75rem; margin:0;">
           <div class="help">Provisional (incl. pending)</div>
           <div style="font-size:1.5rem;"><strong>${esc(score.provisionalPoints)}</strong></div>
+        </div>
+        <div class="card" style="padding:.75rem; margin:0;">
+          <div class="help">Streak bonus</div>
+          <div style="font-size:1.5rem;"><strong>${esc(score.postingStreakBonus || 0)}</strong></div>
         </div>
         <div class="card" style="padding:.75rem; margin:0;">
           <div class="help">8-county sweep bonus</div>

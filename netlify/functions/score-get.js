@@ -3,9 +3,14 @@ import { json, requireUser } from "./_lib/team.js";
 import {
   calcCalculatedPoints,
   calcEightCountySweepBonus,
+  calcPostingStreakBonus,
   isApproved,
   SCORING_VERSION
 } from "./_lib/scoring.js";
+
+const CAPS = {
+  support_chris: 2
+};
 
 export default async (req, context) => {
   if (req.method !== "GET") {
@@ -36,6 +41,8 @@ export default async (req, context) => {
   const approvedSubs = [];
   const subsSummary = [];
 
+  const countedByType = Object.create(null);
+
   for (const it of items) {
     const id = it?.submissionId;
     if (!id) continue;
@@ -45,7 +52,21 @@ export default async (req, context) => {
     if (!sub) continue;
 
     const computed = calcCalculatedPoints(sub);
-    const points = computed.calculatedPoints || 0;
+    let points = computed.calculatedPoints || 0;
+
+    // Apply caps consistently for provisional + official.
+    const type = sub.submissionType || "";
+    const cap = CAPS[type];
+    const already = countedByType[type] || 0;
+    let capBlocked = false;
+    if (typeof cap === "number" && cap > 0) {
+      if (already >= cap) {
+        points = 0;
+        capBlocked = true;
+      } else {
+        countedByType[type] = already + 1;
+      }
+    }
 
     provisional += points;
 
@@ -60,12 +81,14 @@ export default async (req, context) => {
       status: sub.status || "pending",
       createdAt: sub.createdAt,
       submissionDate: sub.submissionDate,
-      points
+      points,
+      capBlocked
     });
   }
 
   const sweepBonus = calcEightCountySweepBonus(approvedSubs);
-  official += sweepBonus;
+  const streakBonus = calcPostingStreakBonus(approvedSubs);
+  official += sweepBonus + streakBonus;
 
   return json(200, {
     teamId,
@@ -74,6 +97,7 @@ export default async (req, context) => {
       officialPoints: official,
       provisionalPoints: provisional,
       eightCountySweepBonus: sweepBonus,
+      postingStreakBonus: streakBonus,
       submissionCount: subsSummary.length,
       submissions: subsSummary
     }

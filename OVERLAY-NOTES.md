@@ -1,25 +1,20 @@
-# Overlay 09 – Scoring Engine
+# Overlay 09 (Update) – Scoring Engine Completeness Patch
 
 ## Goal
-Introduce a deterministic, auditable scoring engine that computes points from what teams actually submit, while keeping the system aligned with the “No Confusion Policy” (teams only earn what they list).
+Finish the scoring engine so it matches the published rules more closely before we move on to admin overlays.
 
 ## What changed
-- **Server-side scoring library**: `netlify/functions/_lib/scoring.js` (versioned).
-- **Score endpoint**: `/.netlify/functions/score-get` returns:
-  - Official points (approved submissions only)
-  - Provisional points (includes pending)
-  - 8-county sweep bonus (+50) applied to official score only
-- **Polling-location area type** added to submissions:
-  - `little_rock` (2 pts/item, cap 10)
-  - `major_city` (3 pts/item, cap 15)
-  - `other` (4 pts/item, cap 20)
-- `submission-create` now stores computed fields (`basePoints`, `hashtagBonus`, `crossPostBonus`, `calculatedPoints`, `platformCount`).
-- `submission-list` backfills computed fields for older submissions.
-- Team Profile UI now:
-  - shows a score summary card
-  - shows calculated points for each submission
-  - provides a live “expected points” preview while filling the submission form
+- Added **posting streak bonus** to the official score calculation (approved submissions only):
+  - 3-day: +10
+  - 5-day: +25
+  - 7-day: +40
+  - 10-day: +60
+  - Conservative interpretation: **highest milestone only** (not cumulative).
+- Enforced **cap** for “Why I Support Chris Jones” submissions:
+  - Max **2** counted (anything beyond is scored as 0, marked `capBlocked: true` in the score summary).
+- Score API now returns `postingStreakBonus` in the breakdown.
+- Team Profile score card now displays the streak bonus.
 
 ## Notes
-- Admin review is still a future overlay, so **all new submissions remain `pending`** and official score will be 0 until approvals exist.
-- Leaderboard remains mock/live swap happens in later overlays per `MASTER_BUILD_PLAN.md`.
+- Distance/Coverage bonus is still not computable because the rules do not specify point values yet.
+- Admin review is still a future overlay, so official points remain dependent on approvals.

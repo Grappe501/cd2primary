@@ -3,7 +3,7 @@
  * Points are awarded only for what the team submits/claims.
  */
 
-export const SCORING_VERSION = 1;
+export const SCORING_VERSION = 2;
 
 export const PLATFORM_KEYS = [
   "tiktok",
@@ -114,4 +114,31 @@ export function calcEightCountySweepBonus(approvedSubs = []) {
   }
 
   return needed.size === 0 ? 50 : 0;
+}
+
+export function calcPostingStreakBonus(approvedSubs = []) {
+  const days = new Set();
+  for (const s of approvedSubs) {
+    const d = s && s.submissionDate;
+    if (typeof d === "string" && /^\d{4}-\d{2}-\d{2}$/.test(d)) days.add(d);
+  }
+  const sorted = Array.from(days).sort();
+  let best = 0;
+  let run = 0;
+  let prevT = null;
+  for (const d of sorted) {
+    const t = Date.parse(d + "T00:00:00Z");
+    if (prevT === null || (t - prevT) === 86400000) {
+      run += 1;
+    } else {
+      run = 1;
+    }
+    if (run > best) best = run;
+    prevT = t;
+  }
+  if (best >= 10) return 60;
+  if (best >= 7) return 40;
+  if (best >= 5) return 25;
+  if (best >= 3) return 10;
+  return 0;
 }
