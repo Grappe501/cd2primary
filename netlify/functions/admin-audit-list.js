@@ -1,34 +1,27 @@
-const { getStore } = require("@netlify/blobs");
-
-function parseAdminEmails() {
-  const raw = process.env.ADMIN_EMAILS || "";
-  return raw.split(",").map(s => s.trim().toLowerCase()).filter(Boolean);
-}
-
-function getIdentity(event) {
-  return event?.context?.clientContext?.user || null;
-}
+import { getStore } from "@netlify/blobs";
+import { json } from "./_lib/team.js";
+import { requireAdmin } from "./_lib/admin.js";
 
 async function readJSON(store, key) {
-  try { return await store.get(key, { type: "json" }) || null; }
+  try { return (await store.get(key, { type: "json" })) || null; }
   catch { return null; }
 }
 
-exports.handler = async (event) => {
+export default async (req, context) => {
+  if (req.method !== "GET") return json(405, { error: "Method not allowed" });
+
+  const admin = requireAdmin(context);
+  if (!admin.ok) return admin.response;
+
   try {
-    const user = getIdentity(event);
-    const admins = parseAdminEmails();
-    const email = (user?.email || "").toLowerCase();
-    if (!email || !admins.includes(email)) return { statusCode: 401, body: "Not authorized" };
+    const url = new URL(req.url);
+    const teamId = url.searchParams.get("teamId");
+    const submissionId = url.searchParams.get("submissionId");
+    if (!teamId || !submissionId) return json(400, { error: "Missing teamId/submissionId" });
 
-    const teamId = event.queryStringParameters?.teamId;
-    const submissionId = event.queryStringParameters?.submissionId;
-    if (!teamId || !submissionId) return { statusCode: 400, body: "Missing teamId/submissionId" };
+    const store = getStore("teams");
 
-    const store = getStore("primaryvote");
-
-    // Audits are stored as separate keys; we maintain a lightweight index to list them efficiently.
-    // If index doesn't exist (older data), attempt a best-effort: return empty.
+    // Index is required for listing; if missing, return empty (older data).
     const idxKey = `audits/${teamId}/${submissionId}/index.json`;
     const idx = await readJSON(store, idxKey);
     const keys = Array.isArray(idx?.keys) ? idx.keys : [];
@@ -38,14 +31,10 @@ exports.handler = async (event) => {
       const a = await readJSON(store, k);
       if (a) audits.push(a);
     }
-    audits.sort((a,b)=> new Date(b.at||b.timestamp||0) - new Date(a.at||a.timestamp||0));
+    audits.sort((a, b) => new Date(b.at || b.timestamp || 0) - new Date(a.at || a.timestamp || 0));
 
-    return {
-      statusCode: 200,
-      headers: { "Content-Type":"application/json", "Cache-Control":"no-store" },
-      body: JSON.stringify({ audits })
-    };
-  } catch (e) {
-    return { statusCode: 500, body: "Audit list failed" };
+    return json(200, { audits });
+  } catch {
+    return json(500, { error: "audit_list_failed" });
   }
 };

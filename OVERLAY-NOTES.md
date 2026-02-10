@@ -17,29 +17,7 @@ causing pages to render unstyled.
   - Build command: `npm run build`
   - Publish directory: `dist`
 
----
-
-# Overlay 13: Style Unification Hotfix
-
-## Goal
-Ensure **no page renders unstyled** by restoring the missing CSS entrypoint used by the landing, leaderboard, and admin pages.
-
-## What changed
-- Added `src/assets/css/styles.css`:
-  - Imports the canonical design system stylesheet (`site.css`)
-  - Adds a minimal compatibility layer for legacy `cj-*` classnames used by:
-    - `/` (landing)
-    - `/leaderboard/`
-    - `/admin/`
-
-## Why
-Some pages referenced `/assets/css/styles.css` which did not exist, causing browser-default styling (hard to read and off-brand).
-
-## Verify
-- Load these routes and confirm the site is styled:
-  - `/`
-  - `/leaderboard/`
-  - `/admin/`
-- Confirm CSS returns 200:
-  - `/assets/css/site.css`
-  - `/assets/css/styles.css`
+## Overlay 14 — Functions Module + Store Normalization (2026-02-10)
+- Purpose: make live leaderboard, exports, and audit list stable and consistent with the rest of the ESM codebase.
+- Key changes: convert CommonJS → ESM; standardize blob store to `teams`; align index expectations; apply official bonuses in leaderboard.
+- Verify: `/ .netlify/functions/leaderboard-get` returns 200 with teams; `/admin/` export works; audit list returns 200 (empty if no audit index).

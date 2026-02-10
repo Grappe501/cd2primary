@@ -79,8 +79,8 @@
 - Restored deterministic build output by adding a build script that copies src/ → dist/
 - Updated netlify.toml to publish dist/ and run npm run build so assets (CSS/JS) always deploy with HTML
 
-
-## Overlay 13
-- Hotfix: added /assets/css/styles.css entrypoint (imports site.css)
-- Added legacy CJ class compatibility layer so landing/leaderboard/admin render styled
-- Appended stabilization overlay track plan (Overlays 13–17)
+## Overlay 14: Functions Normalization (2026-02-10)
+- Converted leaderboard/export/audit functions to ESM to match repo module type.
+- Standardized Netlify Blobs store name to `teams` (removes `primaryvote` split).
+- Aligned leaderboard/export logic with existing index schemas: `teams/index.json` uses `{ items: [...] }`, submissions index uses `{ items: [...] }`.
+- Leaderboard now applies official-only bonuses (8-county sweep + posting streak) to official score.

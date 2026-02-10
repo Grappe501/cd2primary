@@ -1,37 +1,35 @@
-const { getStore } = require("@netlify/blobs");
+import { getStore } from "@netlify/blobs";
+import { json } from "./_lib/team.js";
+import { requireAdmin } from "./_lib/admin.js";
 
-function parseAdminEmails() {
-  const raw = process.env.ADMIN_EMAILS || "";
-  return raw.split(",").map(s => s.trim().toLowerCase()).filter(Boolean);
-}
-function getIdentity(event){ return event?.context?.clientContext?.user || null; }
+/**
+ * Best-effort reindex.
+ * Note: Netlify Blobs does not provide a general key listing API here,
+ * so this endpoint currently only (re)writes an index if the caller
+ * supplies explicit audit keys.
+ *
+ * POST body:
+ * { teamId: string, submissionId: string, keys: string[] }
+ */
+export default async (req, context) => {
+  if (req.method !== "POST") return json(405, { error: "Method not allowed" });
 
-async function readJSON(store, key) { try { return await store.get(key, { type:"json" }) || null; } catch { return null; } }
-async function writeJSON(store, key, value) { await store.set(key, JSON.stringify(value), { contentType:"application/json" }); }
+  const admin = requireAdmin(context);
+  if (!admin.ok) return admin.response;
 
-exports.handler = async (event) => {
   try {
-    const user = getIdentity(event);
-    const admins = parseAdminEmails();
-    const email = (user?.email || "").toLowerCase();
-    if (!email || !admins.includes(email)) return { statusCode: 401, body: "Not authorized" };
+    const body = await req.json().catch(() => null);
+    const teamId = body?.teamId;
+    const submissionId = body?.submissionId;
+    const keys = Array.isArray(body?.keys) ? body.keys : [];
+    if (!teamId || !submissionId) return json(400, { error: "Missing teamId/submissionId" });
 
-    const teamId = event.queryStringParameters?.teamId;
-    const submissionId = event.queryStringParameters?.submissionId;
-    if (!teamId || !submissionId) return { statusCode: 400, body: "Missing teamId/submissionId" };
-
-    const store = getStore("primaryvote");
-
-    // Best-effort: if admin-submission-update already writes audit entries but not an index,
-    // we can't list arbitrary keys. So this endpoint is a placeholder for future enhancement.
-    // For now it just creates an empty index file if missing.
+    const store = getStore("teams");
     const idxKey = `audits/${teamId}/${submissionId}/index.json`;
-    const idx = await readJSON(store, idxKey);
-    if (idx) return { statusCode: 200, body: JSON.stringify({ ok:true, keys: idx.keys || [] }) };
+    await store.set(idxKey, JSON.stringify({ keys }), { contentType: "application/json" });
 
-    await writeJSON(store, idxKey, { keys: [] });
-    return { statusCode: 200, body: JSON.stringify({ ok:true, keys: [] }) };
-  } catch (e) {
-    return { statusCode: 500, body: "Reindex failed" };
+    return json(200, { ok: true, idxKey, count: keys.length });
+  } catch {
+    return json(500, { error: "audit_reindex_failed" });
   }
 };

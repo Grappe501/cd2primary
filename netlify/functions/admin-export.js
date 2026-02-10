@@ -1,18 +1,10 @@
-const { getStore } = require("@netlify/blobs");
-
-function parseAdminEmails() {
-  const raw = process.env.ADMIN_EMAILS || "";
-  return raw.split(",").map(s => s.trim().toLowerCase()).filter(Boolean);
-}
-
-function getIdentity(event) {
-  // Netlify Identity JWT is validated by Netlify when using "Authorization: Bearer"
-  // We rely on context.clientContext.user for identity.
-  return event?.context?.clientContext?.user || null;
-}
+import { getStore } from "@netlify/blobs";
+import { json } from "./_lib/team.js";
+import { requireAdmin } from "./_lib/admin.js";
+import { getTeamsIndex } from "./_lib/teamsIndex.js";
 
 async function readJSON(store, key) {
-  try { return await store.get(key, { type: "json" }) || null; }
+  try { return (await store.get(key, { type: "json" })) || null; }
   catch { return null; }
 }
 
@@ -24,56 +16,61 @@ function toCSV(rows) {
   };
   const header = [
     "teamId","teamName","homeCounty",
-    "submissionId","status","type","createdAt",
-    "calculatedPoints","platforms","links",
-    "locationCounty","locations"
+    "submissionId","status","submissionType","createdAt","submissionDate",
+    "calculatedPoints","basePoints","hashtagBonus","crossPostBonus","platformCount",
+    "links",
+    "pollingCounty","pollingPlaces"
   ];
   const lines = [header.join(",")];
-  for (const r of rows) {
-    lines.push(header.map(k => esc(r[k])).join(","));
-  }
+  for (const r of rows) lines.push(header.map((k) => esc(r[k])).join(","));
   return lines.join("\n");
 }
 
-exports.handler = async (event) => {
+export default async (req, context) => {
+  if (req.method !== "GET") return json(405, { error: "Method not allowed" });
+
+  const admin = requireAdmin(context);
+  if (!admin.ok) return admin.response;
+
   try {
-    const user = getIdentity(event);
-    const admins = parseAdminEmails();
-    const email = (user?.email || "").toLowerCase();
-    if (!email || !admins.includes(email)) {
-      return { statusCode: 401, body: "Not authorized" };
-    }
+    const url = new URL(req.url);
+    const format = (url.searchParams.get("format") || "csv").toLowerCase();
 
-    const format = (event.queryStringParameters?.format || "csv").toLowerCase();
-    const store = getStore("primaryvote");
+    const store = getStore("teams");
 
-    const tIndex = await readJSON(store, "teams/index.json");
-    const teamIds = Array.isArray(tIndex?.teamIds) ? tIndex.teamIds : [];
+    const idx = await getTeamsIndex(store);
+    const teamIds = Array.isArray(idx.items) ? idx.items.map((x) => x.teamId).filter(Boolean) : [];
 
-    const out = [];
+    const rows = [];
     for (const teamId of teamIds) {
       const team = await readJSON(store, `teams/${teamId}.json`);
       if (!team) continue;
 
       const sidx = await readJSON(store, `submissions/index/${teamId}.json`);
-      const submissionIds = Array.isArray(sidx?.submissionIds) ? sidx.submissionIds : [];
+      const items = Array.isArray(sidx?.items) ? sidx.items : [];
+      const submissionIds = items.map((x) => x.submissionId).filter(Boolean);
 
       for (const submissionId of submissionIds) {
         const sub = await readJSON(store, `submissions/${teamId}/${submissionId}.json`);
         if (!sub) continue;
-        out.push({
+
+        rows.push({
           teamId,
           teamName: team.teamName || "",
           homeCounty: team.homeCounty || "",
           submissionId,
           status: sub.status || "pending",
-          type: sub.type || "",
+          submissionType: sub.submissionType || "",
           createdAt: sub.createdAt || "",
-          calculatedPoints: sub.calculatedPoints ?? sub.points ?? 0,
-          platforms: Array.isArray(sub.platforms) ? sub.platforms.join("|") : Object.keys(sub.links || {}).join("|"),
+          submissionDate: sub.submissionDate || "",
+          calculatedPoints: sub.calculatedPoints ?? 0,
+          basePoints: sub.basePoints ?? "",
+          hashtagBonus: sub.hashtagBonus ?? "",
+          crossPostBonus: sub.crossPostBonus ?? "",
+          platformCount: sub.platformCount ?? "",
           links: JSON.stringify(sub.links || {}),
-          locationCounty: sub.locationCounty || "",
-          locations: JSON.stringify(sub.locations || []),
+          pollingCounty: sub.pollingCounty || "",
+          pollingPlaces: JSON.stringify(sub.pollingPlaces || []),
         });
       }
     }
@@ -84,23 +81,23 @@ exports.handler = async (event) => {
         headers: {
           "Content-Type": "application/json",
           "Content-Disposition": "attachment; filename=\"primaryvote_export.json\"",
-          "Cache-Control": "no-store"
+          "Cache-Control": "no-store",
         },
-        body: JSON.stringify({ generatedAt: new Date().toISOString(), rows: out })
+        body: JSON.stringify({ generatedAt: new Date().toISOString(), rows }),
       };
     }
 
-    const csv = toCSV(out);
+    const csv = toCSV(rows);
     return {
       statusCode: 200,
       headers: {
         "Content-Type": "text/csv; charset=utf-8",
         "Content-Disposition": "attachment; filename=\"primaryvote_export.csv\"",
-        "Cache-Control": "no-store"
+        "Cache-Control": "no-store",
       },
-      body: csv
+      body: csv,
     };
-  } catch (e) {
-    return { statusCode: 500, body: "Export failed" };
+  } catch {
+    return json(500, { error: "export_failed" });
   }
 };
