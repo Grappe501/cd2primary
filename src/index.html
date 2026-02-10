@@ -1,97 +1,54 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="stylesheet" href="/assets/css/site.css" />
-    <title>AR-02 #PrimaryVote! Scavenger Hunt</title>
-  </head>
-  <body>
-    
-<header class="nav">
-  <div class="container nav-inner spread">
-    <a class="brand" href="/">
-      <span class="brand-mark" aria-hidden="true"></span>
-      <span>AR-02 #PrimaryVote! Scavenger Hunt</span>
-    </a>
-    <nav class="nav-links" aria-label="Primary">
-      <a href="/rules/">Rules</a>
-      <a href="/handout/">Handout</a>
-      <a href="/counties/">Counties</a>
-      <a href="/leaderboard/">Leaderboard</a>
-      <a class="btn primary" href="/app/">Join / Sign In</a>
-    </nav>
-  </div>
-</header>
-
-
-    <main class="container">
-      <section class="hero">
-        <h1>Daily voter education. Teams of two. Real impact.</h1>
-        <p class="lede">
-          Create vertical videos that help Arkansas voters understand the primary + nonpartisan election,
-          early voting, and where to vote — then tag the campaign so we can repost and amplify.
-        </p>
-        <div class="row" style="margin-top: 1.25rem;">
-          <a class="btn primary" href="/app/">Join / Sign In</a>
-          <a class="btn" href="/rules/">Read the Rules</a>
-          <a class="btn" href="/leaderboard/">See the Leaderboard</a>
-        </div>
-        <div class="badges">
-          <span class="badge">Required: #PrimaryVote!</span>
-          <span class="badge">Required: #ChrisJonesforCongress</span>
-          <span class="badge">Deadline: Mar 3 • 5:00 PM</span>
-        </div>
-      </section>
-
-      <section class="grid cols-3 section" style="padding-top: 0;">
-        <article class="card">
-          <h2>Cover polling locations</h2>
-          <p>Earn points for checklist items covered at each location — plus bonuses for county coverage and streaks.</p>
-        </article>
-        <article class="card">
-          <h2>Recruit and celebrate</h2>
-          <p>Bring new volunteers into the effort with celebratory videos and verified signups.</p>
-        </article>
-        <article class="card">
-          <h2>Win prizes</h2>
-          <p>Top teams get recognized on the leaderboard and can win prizes donated by the community.</p>
-        </article>
-      </section>
-
-      <hr class="hr" />
-
-      <section class="section" style="padding-top: 0;">
-        <div class="spread" style="gap:1rem; align-items:flex-end;">
-          <div>
-            <h2 style="margin-bottom:.25rem;">Top 5 Teams</h2>
-            <p class="lede" style="margin-bottom:0;">
-              Updated from mock data for now. (Overlay 11 will make this live from the database.)
-            </p>
-          </div>
-          <a class="btn" href="/leaderboard/">View Full Leaderboard</a>
-        </div>
-
-        <div class="grid" data-top5 style="margin-top: 1rem;"></div>
-      </section>
-    </main>
-
-    
-<footer class="footer">
-  <div class="container spread">
-    <div>
-      <div><strong>Chris Jones for Congress</strong></div>
-      <small>AR-02 #PrimaryVote! Scavenger Hunt • Feb 13 – Mar 3, 2026</small>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>#PrimaryVote! CD2 • Chris Jones for Congress</title>
+  <link rel="stylesheet" href="/assets/css/styles.css" />
+</head>
+<body class="cj-page">
+  <header class="cj-header">
+    <div class="cj-container">
+      <a class="cj-brand" href="/">#PrimaryVote! CD2</a>
+      <nav class="cj-nav">
+        <a href="/rules/">Rules</a>
+        <a href="/counties/">Counties</a>
+        <a href="/leaderboard/">Leaderboard</a>
+        <a href="/app/">Team Portal</a>
+      </nav>
     </div>
-    <div class="row">
-      <a href="/rules/">Rules</a>
-      <a href="/leaderboard/">Leaderboard</a>
-      <a href="/counties/">Counties</a>
+  </header>
+
+  <main class="cj-container cj-main">
+    <section class="cj-hero">
+      <h1 class="cj-h1">Find polling places. Post the proof. Rack up points.</h1>
+      <p class="cj-lede">Vertical voter education + civic fun across Arkansas Congressional District 2.</p>
+      <div class="cj-row cj-gap-2 cj-mt-3">
+        <a class="cj-btn cj-btn--primary" href="/app/">Join / Sign In</a>
+        <a class="cj-btn cj-btn--ghost" href="/rules/">Read the Rules</a>
+      </div>
+    </section>
+
+    <section class="cj-section">
+      <div class="cj-row cj-row--between cj-row--center cj-mb-2">
+        <h2 class="cj-h2">Top Teams</h2>
+        <a class="cj-link" href="/leaderboard/">View full leaderboard →</a>
+      </div>
+      <div class="cj-grid" data-top5>
+        <div class="cj-card"><div class="cj-card__body"><p class="cj-muted">Loading…</p></div></div>
+      </div>
+      <p class="cj-muted cj-mt-2" data-leaderboard-status></p>
+    </section>
+  </main>
+
+  <footer class="cj-footer">
+    <div class="cj-container">
+      <p class="cj-muted">Chris Jones for Congress • Powered by volunteers</p>
     </div>
-  </div>
-</footer>
+  </footer>
 
-
-    <script type="module" src="/assets/js/leaderboard.mock.js"></script>
-  </body>
+  <!-- Optional mock fallback script may already exist in repo; keep it if present -->
+  <script src="/assets/js/leaderboard.mock.js"></script>
+  <script src="/assets/js/leaderboard.live.js"></script>
+</body>
 </html>

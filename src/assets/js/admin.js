@@ -1,306 +1,228 @@
-import { initIdentity, currentUser, onAuthChange, logout, getAccessToken } from "/assets/js/auth.js";
-
-const statusEl = document.getElementById("status");
-const btnOpen = document.getElementById("btnOpen");
-const btnLogout = document.getElementById("btnLogout");
-const notAuthEl = document.getElementById("notAuthorized");
-const adminEl = document.getElementById("adminPanel");
-const configEl = document.getElementById("adminConfigHint");
-
-const filterStatus = document.getElementById("filterStatus");
-const filterSearch = document.getElementById("filterSearch");
-const btnRefresh = document.getElementById("btnRefresh");
-const queueMeta = document.getElementById("queueMeta");
-const queueBody = document.getElementById("queueBody");
-
-const identity = initIdentity();
-
-function show(el, yes) {
-  if (!el) return;
-  el.hidden = !yes;
-}
-
-function escapeHtml(s) {
-  return String(s || "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
-
-async function api(path, { method = "GET", body } = {}) {
-  const token = await getAccessToken();
-  const headers = { Authorization: `Bearer ${token}` };
-  if (body) headers["content-type"] = "application/json";
-  const res = await fetch(path, { method, headers, body: body ? JSON.stringify(body) : undefined });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    const err = new Error(data?.error || `Request failed (${res.status})`);
-    err.status = res.status;
-    err.data = data;
-    throw err;
-  }
-  return data;
-}
-
-async function fetchAdminStatus() {
-  const token = await getAccessToken();
-  if (!token) return null;
-
-  const res = await fetch("/.netlify/functions/admin-whoami", {
-    headers: { Authorization: `Bearer ${token}` }
-  });
-
-  if (!res.ok) {
-    const data = await res.json().catch(() => ({}));
-    return { ok: false, status: res.status, data };
-  }
-  const data = await res.json();
-  return { ok: true, data };
-}
-
-function platformBadges(platformLinks = {}) {
-  const entries = Object.entries(platformLinks)
-    .filter(([_, v]) => typeof v === "string" && v.trim())
-    .slice(0, 5);
-  if (!entries.length) return "—";
-
-  const label = {
-    tiktok: "TikTok",
-    instagram: "Instagram",
-    facebook: "Facebook",
-    x: "X",
-    bluesky: "Bluesky"
+(function () {
+  const FN = {
+    whoami: "/.netlify/functions/admin-whoami",
+    list: "/.netlify/functions/admin-submissions-list",
+    update: "/.netlify/functions/admin-submission-update",
+    export: "/.netlify/functions/admin-export",
+    audits: "/.netlify/functions/admin-audit-list",
   };
 
-  return entries
-    .map(([k, url]) => {
-      const text = label[k] || k;
-      return `<a class="badge" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(text)}</a>`;
-    })
-    .join(" ");
-}
+  function qs(s, r=document){ return r.querySelector(s); }
+  function escapeHtml(s){ return String(s??"").replace(/[&<>"']/g, c=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c])); }
+  function fmt(n){ const x=Number(n||0); return Number.isFinite(x)?x.toLocaleString():"0"; }
+  function toISO(d){ try { return new Date(d).toISOString(); } catch { return ""; } }
+  function prettyDate(d){ try { return new Date(d).toLocaleString(); } catch { return ""; } }
 
-function statusBadge(status) {
-  const s = String(status || "pending");
-  if (s === "approved") return `<span class="badge success">Approved</span>`;
-  if (s === "rejected") return `<span class="badge danger">Rejected</span>`;
-  return `<span class="badge">Pending</span>`;
-}
+  async function authedFetch(url, opts={}) {
+    const user = window.netlifyIdentity && window.netlifyIdentity.currentUser && window.netlifyIdentity.currentUser();
+    const token = user ? await user.jwt() : null;
+    const headers = Object.assign({ "Accept":"application/json" }, opts.headers || {});
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+    const res = await fetch(url, Object.assign({}, opts, { headers }));
+    return res;
+  }
 
-function renderRows(items, search) {
-  const q = String(search || "").trim().toLowerCase();
-  const filtered = q
-    ? items.filter((it) => {
+  async function authedJSON(url, opts={}) {
+    const res = await authedFetch(url, opts);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+  }
+
+  function platformBadges(platforms) {
+    const list = Array.isArray(platforms) ? platforms : [];
+    if (!list.length) return '<span class="cj-muted">—</span>';
+    return list.map(p => `<span class="cj-badge">${escapeHtml(p)}</span>`).join(" ");
+  }
+
+  function renderAudit(panel, bodyEl, audits) {
+    panel.hidden = false;
+    if (!audits.length) {
+      bodyEl.innerHTML = `<p class="cj-muted">No audit entries found.</p>`;
+      return;
+    }
+    bodyEl.innerHTML = audits.map(a => `
+      <div class="cj-card cj-card--tight cj-mb-2">
+        <div class="cj-card__body">
+          <div class="cj-row cj-row--between cj-row--center">
+            <div><strong>${escapeHtml(a.action || "ACTION")}</strong></div>
+            <div class="cj-muted">${escapeHtml(prettyDate(a.at || a.timestamp || ""))}</div>
+          </div>
+          ${a.note ? `<div class="cj-mt-1">${escapeHtml(a.note)}</div>` : ""}
+          ${a.byEmail ? `<div class="cj-muted cj-mt-1">by ${escapeHtml(a.byEmail)}</div>` : ""}
+        </div>
+      </div>
+    `).join("");
+  }
+
+  function applyFilterAndSearch(all, status, q) {
+    let items = all.slice();
+    if (status && status !== "all") items = items.filter(s => (s.status || "pending") === status);
+    const needle = (q || "").trim().toLowerCase();
+    if (needle) {
+      items = items.filter(s => {
         const hay = [
-          it.teamName,
-          it.teamId,
-          it.submissionId,
-          it.submissionTypeLabel,
-          it.ownerEmail,
-          it.member1Name,
-          it.member2Name
-        ]
-          .filter(Boolean)
-          .join(" ")
-          .toLowerCase();
-        return hay.includes(q);
-      })
-    : items;
-
-  if (!filtered.length) {
-    queueBody.innerHTML = `<tr><td colspan="7"><em>No submissions match your filters.</em></td></tr>`;
-    return;
+          s.teamName, s.homeCounty, s.type, s.status,
+          ...(s.platforms || []),
+          ...(Object.values(s.links || {}))
+        ].join(" ").toLowerCase();
+        return hay.includes(needle);
+      });
+    }
+    // newest first
+    items.sort((a,b)=> new Date(b.createdAt||0) - new Date(a.createdAt||0));
+    return items;
   }
 
-  queueBody.innerHTML = filtered
-    .map((it) => {
-      const points = typeof it.calculatedPoints === "number" ? it.calculatedPoints : 0;
-      const note = it.adminNote ? `<div style="margin-top:.25rem;"><small><strong>Note:</strong> ${escapeHtml(it.adminNote)}</small></div>` : "";
-      return `
-        <tr data-team-id="${escapeHtml(it.teamId)}" data-submission-id="${escapeHtml(it.submissionId)}">
-          <td>
-            <div><strong>${escapeHtml(it.teamName || "(Unnamed Team)")}</strong></div>
-            <small>${escapeHtml(it.homeCountyName || it.homeCounty || "")}${it.teamId ? ` • <code>${escapeHtml(it.teamId)}</code>` : ""}</small>
-          </td>
-          <td>
-            <div>${escapeHtml(it.submissionTypeLabel || it.submissionType || "")}</div>
-            <small><code>${escapeHtml(it.submissionId)}</code></small>
-          </td>
-          <td>
-            <div>${escapeHtml(it.submissionDate || "—")}</div>
-            <small>${escapeHtml(new Date(it.createdAt).toLocaleString())}</small>
-          </td>
-          <td>${platformBadges(it.platformLinks)}</td>
-          <td>
-            <div><strong>${points}</strong></div>
-            <small>Base ${it.basePoints} + Hashtag ${it.hashtagBonus} + Cross-post ${it.crossPostBonus}</small>
-          </td>
-          <td>
-            ${statusBadge(it.status)}
-            ${note}
-          </td>
-          <td>
-            <div class="row" style="gap:.5rem; flex-wrap:wrap;">
-              <button class="btn small primary" data-action="approve" type="button">Approve</button>
-              <button class="btn small" data-action="reject" type="button">Reject</button>
-              <button class="btn small" data-action="pending" type="button">Set Pending</button>
-              <button class="btn small" data-action="details" type="button">Details</button>
-            </div>
-          </td>
-        </tr>
-      `;
-    })
-    .join("");
-}
-
-function detailsText(it) {
-  const lines = [];
-  lines.push(`Team: ${it.teamName || ""} (${it.teamId})`);
-  lines.push(`Home county: ${it.homeCountyName || it.homeCounty || ""}`);
-  lines.push(`Type: ${it.submissionTypeLabel || it.submissionType}`);
-  lines.push(`Status: ${it.status}`);
-  lines.push(`Posted date: ${it.submissionDate}`);
-  lines.push(`Created: ${it.createdAt}`);
-  lines.push(`Points: ${it.calculatedPoints} (base ${it.basePoints}, hashtag ${it.hashtagBonus}, cross-post ${it.crossPostBonus})`);
-  if (it.pollingCountyName || it.pollingCounty) lines.push(`Polling county: ${it.pollingCountyName || it.pollingCounty}`);
-  if (it.pollingAreaType) lines.push(`Area type: ${it.pollingAreaType}`);
-  if (Array.isArray(it.claimedItems) && it.claimedItems.length) lines.push(`Checklist: ${it.claimedItems.join(", ")}`);
-  if (it.primaryUrl) lines.push(`Primary URL: ${it.primaryUrl}`);
-  const platforms = it.platformLinks || {};
-  const pKeys = Object.keys(platforms).filter((k) => platforms[k]);
-  if (pKeys.length) {
-    lines.push("Platform links:");
-    for (const k of pKeys) lines.push(`- ${k}: ${platforms[k]}`);
-  }
-  if (it.notes) lines.push(`Notes: ${it.notes}`);
-  if (it.adminNote) lines.push(`Admin note: ${it.adminNote}`);
-  return lines.join("\n");
-}
-
-let lastQueue = [];
-
-async function loadQueue() {
-  if (!queueMeta || !queueBody) return;
-
-  const status = filterStatus?.value || "pending";
-  queueMeta.textContent = "Loading submissions…";
-  queueBody.innerHTML = `<tr><td colspan="7"><em>Loading…</em></td></tr>`;
-
-  const data = await api(`/.netlify/functions/admin-submissions-list?status=${encodeURIComponent(status)}`);
-  lastQueue = Array.isArray(data.items) ? data.items : [];
-  const total = lastQueue.length;
-  queueMeta.textContent = `${total} submissions loaded (${status}).`;
-  renderRows(lastQueue, filterSearch?.value || "");
-}
-
-async function updateStatus(teamId, submissionId, status) {
-  const adminNote = status === "rejected" ? prompt("Optional: add a rejection note (shown to team)", "") : "";
-  await api("/.netlify/functions/admin-submission-update", {
-    method: "POST",
-    body: { teamId, submissionId, status, adminNote }
-  });
-}
-
-queueBody?.addEventListener("click", async (e) => {
-  const btn = e.target.closest("button[data-action]");
-  if (!btn) return;
-  const tr = btn.closest("tr[data-team-id][data-submission-id]");
-  if (!tr) return;
-
-  const teamId = tr.getAttribute("data-team-id");
-  const submissionId = tr.getAttribute("data-submission-id");
-  const action = btn.getAttribute("data-action");
-
-  const it = lastQueue.find((x) => x.teamId === teamId && x.submissionId === submissionId);
-  if (action === "details") {
-    alert(detailsText(it || { teamId, submissionId }));
-    return;
+  function rowHtml(s) {
+    const links = s.links || {};
+    const points = s.calculatedPoints ?? s.points ?? 0;
+    return `
+      <tr>
+        <td>${escapeHtml(prettyDate(s.createdAt))}</td>
+        <td>
+          <div><strong>${escapeHtml(s.teamName || "Team")}</strong></div>
+          <div class="cj-muted">${escapeHtml(s.homeCounty || "")}</div>
+        </td>
+        <td>${escapeHtml(s.type || "")}</td>
+        <td>${platformBadges(s.platforms || Object.keys(links))}</td>
+        <td><span class="cj-badge cj-badge--${escapeHtml(s.status || "pending")}">${escapeHtml((s.status||"pending").toUpperCase())}</span></td>
+        <td><strong>${fmt(points)}</strong></td>
+        <td>
+          <div class="cj-row cj-gap-1 cj-row--wrap">
+            <button class="cj-btn cj-btn--xs cj-btn--primary" data-action="approve" data-team="${escapeHtml(s.teamId)}" data-sub="${escapeHtml(s.submissionId)}">Approve</button>
+            <button class="cj-btn cj-btn--xs cj-btn--danger" data-action="reject" data-team="${escapeHtml(s.teamId)}" data-sub="${escapeHtml(s.submissionId)}">Reject</button>
+            <button class="cj-btn cj-btn--xs cj-btn--ghost" data-action="pending" data-team="${escapeHtml(s.teamId)}" data-sub="${escapeHtml(s.submissionId)}">Pending</button>
+            <button class="cj-btn cj-btn--xs cj-btn--ghost" data-action="audit" data-team="${escapeHtml(s.teamId)}" data-sub="${escapeHtml(s.submissionId)}">Audit</button>
+          </div>
+        </td>
+      </tr>
+    `;
   }
 
-  btn.disabled = true;
-  try {
-    if (action === "approve") await updateStatus(teamId, submissionId, "approved");
-    if (action === "reject") await updateStatus(teamId, submissionId, "rejected");
-    if (action === "pending") await updateStatus(teamId, submissionId, "pending");
-    await loadQueue();
-  } catch (err) {
-    alert(`Update failed: ${err.message}`);
-  } finally {
-    btn.disabled = false;
-  }
-});
-
-btnRefresh?.addEventListener("click", () => loadQueue());
-filterStatus?.addEventListener("change", () => loadQueue());
-filterSearch?.addEventListener("input", () => renderRows(lastQueue, filterSearch.value));
-
-async function render() {
-  const user = currentUser();
-  if (!user) {
-    statusEl.textContent = "You are not signed in yet.";
-    statusEl.classList.remove("success");
-    show(btnLogout, false);
-    show(notAuthEl, false);
-    show(adminEl, false);
-    show(configEl, false);
-    btnOpen.textContent = "Open Sign In";
-    return;
+  async function ensureAdmin() {
+    const statusEl = qs("[data-admin-status]");
+    const user = window.netlifyIdentity && window.netlifyIdentity.currentUser && window.netlifyIdentity.currentUser();
+    if (!user) {
+      if (statusEl) statusEl.textContent = "Please sign in to access admin tools.";
+      window.netlifyIdentity && window.netlifyIdentity.open && window.netlifyIdentity.open("login");
+      throw new Error("Not logged in");
+    }
+    const who = await authedJSON(FN.whoami);
+    if (!who.isAdmin) {
+      if (statusEl) statusEl.textContent = "Not authorized.";
+      throw new Error("Not admin");
+    }
+    if (statusEl) statusEl.textContent = `Signed in as ${who.email || "admin"}`;
+    return who;
   }
 
-  statusEl.textContent = `Signed in as ${user.email}`;
-  statusEl.classList.add("success");
-  show(btnLogout, true);
-  btnOpen.textContent = "Manage Account";
+  async function loadAll() {
+    const status = qs("[data-filter]")?.value || "pending";
+    const q = qs("[data-search]")?.value || "";
+    const tbody = qs("[data-rows]");
+    const statusEl = qs("[data-admin-status]");
+    if (statusEl) statusEl.textContent = "Loading submissions…";
 
-  statusEl.textContent = "Checking admin access…";
-  const adminStatus = await fetchAdminStatus();
+    const data = await authedJSON(FN.list);
+    const all = Array.isArray(data.submissions) ? data.submissions : [];
+    const items = applyFilterAndSearch(all, status, q);
 
-  if (!adminStatus) {
-    statusEl.textContent = `Signed in as ${user.email} (no token)`;
-    show(notAuthEl, true);
-    show(adminEl, false);
-    show(configEl, false);
-    return;
+    tbody.innerHTML = items.length ? items.map(rowHtml).join("") : `<tr><td colspan="7" class="cj-muted">No submissions found.</td></tr>`;
+    if (statusEl) statusEl.textContent = `Showing ${items.length} submissions (${status}).`;
+    return all;
   }
 
-  if (!adminStatus.ok) {
-    statusEl.textContent = `Admin check failed (HTTP ${adminStatus.status})`;
-    show(notAuthEl, true);
-    show(adminEl, false);
-    show(configEl, true);
-    return;
+  async function updateStatus(teamId, submissionId, status) {
+    await authedFetch(FN.update, {
+      method: "POST",
+      headers: { "Content-Type":"application/json" },
+      body: JSON.stringify({ teamId, submissionId, status })
+    }).then(async (r)=> {
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      return r.json();
+    });
   }
 
-  const { isAdmin, adminsConfigured } = adminStatus.data;
-  if (!adminsConfigured) {
-    statusEl.textContent = "Admin allowlist is not configured yet.";
-    show(notAuthEl, true);
-    show(adminEl, false);
-    show(configEl, true);
-    return;
+  async function showAudits(teamId, submissionId) {
+    const panel = qs("[data-audit-panel]");
+    const body = qs("[data-audit-body]");
+    const data = await authedJSON(`${FN.audits}?teamId=${encodeURIComponent(teamId)}&submissionId=${encodeURIComponent(submissionId)}`);
+    const audits = Array.isArray(data.audits) ? data.audits : [];
+    renderAudit(panel, body, audits);
   }
 
-  if (isAdmin) {
-    statusEl.textContent = `Admin access granted: ${user.email}`;
-    show(notAuthEl, false);
-    show(adminEl, true);
-    show(configEl, false);
-    await loadQueue();
-  } else {
-    statusEl.textContent = `Not authorized for admin: ${user.email}`;
-    show(notAuthEl, true);
-    show(adminEl, false);
-    show(configEl, false);
+  async function doExport(kind) {
+    // triggers file download; keep auth header
+    const res = await authedFetch(`${FN.export}?format=${encodeURIComponent(kind)}`, { method: "GET" });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = kind === "csv" ? "primaryvote_export.csv" : "primaryvote_export.json";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=> URL.revokeObjectURL(url), 1000);
   }
-}
 
-btnOpen?.addEventListener("click", () => {
-  if (!identity) return;
-  identity.open();
-});
-btnLogout?.addEventListener("click", () => logout({ redirectTo: "/" }));
+  async function main() {
+    const statusEl = qs("[data-admin-status]");
+    try {
+      // init identity widget if present
+      if (window.netlifyIdentity) {
+        window.netlifyIdentity.on("login", () => window.location.reload());
+      }
+      await ensureAdmin();
+      await loadAll();
 
-onAuthChange(render);
-render();
+      qs("[data-filter]")?.addEventListener("change", loadAll);
+      qs("[data-search]")?.addEventListener("input", () => { clearTimeout(window.__t); window.__t=setTimeout(loadAll, 200); });
+      qs("[data-refresh]")?.addEventListener("click", loadAll);
+
+      document.body.addEventListener("click", async (e) => {
+        const btn = e.target.closest("button[data-action]");
+        if (!btn) return;
+        const action = btn.getAttribute("data-action");
+        const teamId = btn.getAttribute("data-team");
+        const subId = btn.getAttribute("data-sub");
+        try {
+          if (action === "audit") {
+            await showAudits(teamId, subId);
+            return;
+          }
+          btn.disabled = true;
+          await updateStatus(teamId, subId, action === "approve" ? "approved" : action === "reject" ? "rejected" : "pending");
+          await loadAll();
+        } catch (err) {
+          console.error(err);
+          if (statusEl) statusEl.textContent = `Action failed: ${err.message || err}`;
+        } finally {
+          btn.disabled = false;
+        }
+      });
+
+      qs("[data-audit-close]")?.addEventListener("click", () => {
+        const panel = qs("[data-audit-panel]");
+        if (panel) panel.hidden = true;
+      });
+
+      qsa("button[data-export]").forEach(b => {
+        b.addEventListener("click", async () => {
+          const kind = b.getAttribute("data-export");
+          try { await doExport(kind); }
+          catch (err) {
+            console.error(err);
+            if (statusEl) statusEl.textContent = `Export failed: ${err.message || err}`;
+          }
+        });
+      });
+
+    } catch (err) {
+      console.error(err);
+      if (statusEl) statusEl.textContent = err.message || String(err);
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", main);
+})();

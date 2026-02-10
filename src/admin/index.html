@@ -1,140 +1,87 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="stylesheet" href="/assets/css/site.css" />
-    <title>Admin • AR-02 #PrimaryVote! Scavenger Hunt</title>
-    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
-  </head>
-  <body>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin • Review + Approve</title>
+  <link rel="stylesheet" href="/assets/css/styles.css" />
+</head>
+<body class="cj-page">
+  <header class="cj-header">
+    <div class="cj-container">
+      <a class="cj-brand" href="/">#PrimaryVote! CD2</a>
+      <nav class="cj-nav">
+        <a href="/leaderboard/">Leaderboard</a>
+        <a href="/app/">Team Portal</a>
+        <a href="/admin/" class="is-active">Admin</a>
+      </nav>
+    </div>
+  </header>
 
-    <header class="nav">
-      <div class="container nav-inner spread">
-        <a class="brand" href="/">
-          <span class="brand-mark" aria-hidden="true"></span>
-          <span>AR-02 #PrimaryVote! Scavenger Hunt</span>
-        </a>
-        <nav class="nav-links" aria-label="Primary">
-          <a href="/rules/">Rules</a>
-          <a href="/handout/">Handout</a>
-          <a href="/counties/">Counties</a>
-          <a href="/leaderboard/">Leaderboard</a>
-          <a class="btn" href="/app/profile/">Team Profile</a>
-        </nav>
+  <main class="cj-container cj-main">
+    <section class="cj-hero cj-hero--compact">
+      <h1 class="cj-h1">Admin: Review & Approve</h1>
+      <p class="cj-muted">Approve only what’s documented. The rules are the rules.</p>
+      <div class="cj-row cj-gap-2 cj-mt-2">
+        <button class="cj-btn cj-btn--ghost" data-export="csv">Export CSV</button>
+        <button class="cj-btn cj-btn--ghost" data-export="json">Export JSON</button>
+        <button class="cj-btn cj-btn--ghost" data-refresh>Refresh</button>
       </div>
-    </header>
+      <p class="cj-muted cj-mt-2" data-admin-status></p>
+    </section>
 
-    <main class="container">
-      <section class="section" style="padding-top: 2rem;">
-        <div class="card">
-          <h1 style="margin-top:0;">Admin</h1>
-          <p class="lede">
-            This area is restricted. Admin access is enforced by Netlify Identity + a server allowlist.
-          </p>
-
-          <div class="row" style="margin-top: 1rem; flex-wrap: wrap;">
-            <button class="btn primary" id="btnOpen" type="button">Open Sign In</button>
-            <button class="btn" id="btnLogout" type="button" hidden>Log out</button>
-            <a class="btn" href="/">Back to site</a>
-          </div>
-
-          <hr class="hr" />
-
-          <div id="status" class="badge" aria-live="polite">Checking login status…</div>
-
-          <div id="notAuthorized" class="card" style="margin-top: 1rem;" hidden>
-            <h2 style="margin-top:0;">Not authorized</h2>
-            <p style="margin-bottom:0;">
-              If you believe you should have access, ask a site admin to add your email to the Netlify environment variable
-              <code>ADMIN_EMAILS</code>.
-            </p>
-          </div>
-
-          <div id="adminConfigHint" class="card" style="margin-top: 1rem;" hidden>
-            <h2 style="margin-top:0;">Admin allowlist not configured</h2>
-            <p style="margin-bottom:0;">
-              Set <code>ADMIN_EMAILS</code> in Netlify → Site configuration → Environment variables.
-              See <code>admin-notes/admin-access.md</code> in the repo for exact steps.
-            </p>
-          </div>
-
-          <div id="adminPanel" class="card" style="margin-top: 1rem;" hidden>
-            <div class="spread" style="align-items:flex-start; gap:1rem; flex-wrap:wrap;">
-              <div>
-                <h2 style="margin-top:0;">Review & Approvals</h2>
-                <p class="lede" style="margin-bottom:0;">
-                  Approve or reject submissions. Only <strong>approved</strong> submissions count toward <strong>official</strong> points.
-                </p>
-              </div>
-              <div class="row" style="gap:.5rem; flex-wrap:wrap; justify-content:flex-end;">
-                <label class="field" style="min-width: 220px;">
-                  <span class="label">Status</span>
-                  <select id="filterStatus" class="input">
-                    <option value="pending" selected>Pending</option>
-                    <option value="approved">Approved</option>
-                    <option value="rejected">Rejected</option>
-                    <option value="all">All</option>
-                  </select>
-                </label>
-                <label class="field" style="min-width: 260px;">
-                  <span class="label">Search</span>
-                  <input id="filterSearch" class="input" type="search" placeholder="Team, member, or submission id" />
-                </label>
-                <button class="btn" id="btnRefresh" type="button">Refresh</button>
-              </div>
-            </div>
-
-            <hr class="hr" />
-
-            <div id="queueMeta" class="badge" aria-live="polite">Loading queue…</div>
-
-            <div style="overflow:auto; margin-top: .75rem;">
-              <table class="table" style="width:100%; min-width: 980px;">
-                <thead>
-                  <tr>
-                    <th style="text-align:left;">Team</th>
-                    <th style="text-align:left;">Type</th>
-                    <th style="text-align:left;">Posted</th>
-                    <th style="text-align:left;">Links</th>
-                    <th style="text-align:left;">Points</th>
-                    <th style="text-align:left;">Status</th>
-                    <th style="text-align:left;">Actions</th>
-                  </tr>
-                </thead>
-                <tbody id="queueBody">
-                  <tr><td colspan="7"><em>Loading…</em></td></tr>
-                </tbody>
-              </table>
-            </div>
-
-            <details style="margin-top: 1rem;">
-              <summary><strong>Notes</strong></summary>
-              <ul>
-                <li>Approving a submission immediately affects <strong>official</strong> points.</li>
-                <li>Hashtags are a hard gate: if a team did not confirm required hashtags, calculated points are 0.</li>
-                <li>"Why I Support Chris Jones" is capped at <strong>2 counted videos</strong>; extra submissions may be approved but can score 0 due to caps.</li>
-              </ul>
-            </details>
-          </div>
+    <section class="cj-card">
+      <div class="cj-card__body">
+        <div class="cj-row cj-row--between cj-row--wrap cj-gap-2">
+          <select class="cj-select" data-filter>
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+            <option value="all">All</option>
+          </select>
+          <input class="cj-input" type="search" placeholder="Search team, county, platform…" data-search />
         </div>
-      </section>
-    </main>
 
-    <footer class="footer">
-      <div class="container spread">
-        <div>
-          <div><strong>Chris Jones for Congress</strong></div>
-          <small>AR-02 #PrimaryVote! Scavenger Hunt • Feb 13 – Mar 3, 2026</small>
-        </div>
-        <div class="row">
-          <a href="/rules/">Rules</a>
-          <a href="/leaderboard/">Leaderboard</a>
-          <a href="/counties/">Counties</a>
+        <div class="cj-table-wrap cj-mt-3">
+          <table class="cj-table">
+            <thead>
+              <tr>
+                <th>When</th>
+                <th>Team</th>
+                <th>Type</th>
+                <th>Platforms</th>
+                <th>Status</th>
+                <th>Points</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody data-rows>
+              <tr><td colspan="7" class="cj-muted">Loading…</td></tr>
+            </tbody>
+          </table>
         </div>
       </div>
-    </footer>
+    </section>
 
-    <script type="module" src="/assets/js/admin.js"></script>
-  </body>
+    <section class="cj-card cj-mt-3" data-audit-panel hidden>
+      <div class="cj-card__body">
+        <div class="cj-row cj-row--between cj-row--center">
+          <h2 class="cj-h2">Audit History</h2>
+          <button class="cj-btn cj-btn--ghost" data-audit-close>Close</button>
+        </div>
+        <div data-audit-body class="cj-mt-2"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="cj-footer">
+    <div class="cj-container">
+      <p class="cj-muted">Admin access is allowlisted. Actions are audited.</p>
+    </div>
+  </footer>
+
+  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+  <script src="/assets/js/auth.js"></script>
+  <script src="/assets/js/admin.js"></script>
+</body>
 </html>
