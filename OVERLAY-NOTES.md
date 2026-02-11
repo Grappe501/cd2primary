@@ -21,3 +21,16 @@ causing pages to render unstyled.
 - Purpose: make live leaderboard, exports, and audit list stable and consistent with the rest of the ESM codebase.
 - Key changes: convert CommonJS → ESM; standardize blob store to `teams`; align index expectations; apply official bonuses in leaderboard.
 - Verify: `/ .netlify/functions/leaderboard-get` returns 200 with teams; `/admin/` export works; audit list returns 200 (empty if no audit index).
+
+## Overlay 16 — Submission Consistency + Edge Case Hardening (2026-02-10)
+- Purpose: reduce drift/duplication in submissions and make score/leaderboard reads more resilient.
+- Key changes:
+  - Normalize submission URLs in validation (drops hashes, trims, lowercases host, removes trailing slashes on paths).
+  - Block duplicate submissions for the same team when the primary link matches an existing submission.
+  - Submission list now de-dupes the submissions index and heals missing-record pointers.
+  - Admin review updates now also set `updatedAt`.
+  - Leaderboard get returns both `teams` and `items` with points aliases for client compatibility.
+- Verify:
+  - Create two submissions with the same link → second should 409 with duplicate error.
+  - `/app/` submissions list still loads; no duplicates appear; ordering is newest first.
+  - Leaderboard API returns `{ generatedAt, teams, items }` and each item includes `officialPoints`/`provisionalPoints`.

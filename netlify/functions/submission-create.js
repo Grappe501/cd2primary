@@ -41,6 +41,20 @@ export default async (req, context) => {
   const now = new Date().toISOString();
 
   const cleaned = v.cleaned;
+
+  // Duplicate guard (same team + same normalized primaryUrl).
+  // We scan the team index; volume is expected to be small.
+  const existingIdxKey = `submissions/index/${teamId}.json`;
+  const existingIdx = (await store.get(existingIdxKey, { type: "json" }).catch(() => null)) || { items: [] };
+  const existingItems = Array.isArray(existingIdx.items) ? existingIdx.items : [];
+  const existingIds = existingItems.map((x) => x.submissionId).filter(Boolean);
+  for (const existingId of existingIds) {
+    const existing = await store.get(`submissions/${teamId}/${existingId}.json`, { type: "json" }).catch(() => null);
+    if (!existing) continue;
+    if (String(existing.primaryUrl || "").trim() && String(existing.primaryUrl || "").trim() === cleaned.primaryUrl) {
+      return json(409, { error: "Duplicate submission detected (same link already submitted)." });
+    }
+  }
   const computed = calcCalculatedPoints(cleaned);
 
   const submission = {
@@ -63,13 +77,14 @@ export default async (req, context) => {
   await store.set(key, JSON.stringify(submission), { contentType: "application/json" });
 
   // Update index
-  const idxKey = `submissions/index/${teamId}.json`;
-  const idx = (await store.get(idxKey, { type: "json" })) || { items: [] };
-  const items = Array.isArray(idx.items) ? idx.items : [];
+  const idxKey = existingIdxKey;
+  const items = existingItems;
   items.push({
     submissionId,
     createdAt: now,
     submissionType: submission.submissionType,
+    submissionDate: submission.submissionDate,
+    primaryUrl: submission.primaryUrl,
     expectedPoints: submission.expectedPoints,
     calculatedPoints: submission.calculatedPoints
   });

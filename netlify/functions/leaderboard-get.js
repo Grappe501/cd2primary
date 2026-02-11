@@ -77,7 +77,17 @@ export default async (req) => {
 
     teams.sort((a, b) => (b.officialScore || 0) - (a.officialScore || 0));
 
-    return json(200, { generatedAt: new Date().toISOString(), teams });
+    // Back/forward compatible response shape:
+    // - `teams` (legacy)
+    // - `items` (used by newer clients)
+    // Also provide points aliases to reduce UI drift.
+    const itemsOut = teams.map((t) => ({
+      ...t,
+      officialPoints: t.officialScore,
+      provisionalPoints: t.provisionalScore,
+    }));
+
+    return json(200, { generatedAt: new Date().toISOString(), teams: itemsOut, items: itemsOut });
   } catch (e) {
     return json(500, { error: "leaderboard_get_failed" });
   }

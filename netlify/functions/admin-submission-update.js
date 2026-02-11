@@ -38,6 +38,7 @@ export default async (req, context) => {
     ...sub,
     status,
     adminNote,
+    updatedAt: now,
     reviewedAt: now,
     reviewedBy: admin.user.email || admin.user.sub
   };

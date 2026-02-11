@@ -66,8 +66,10 @@
     </div>
   </footer>
 
-  <!-- Optional mock fallback script may already exist in repo; keep it if present -->
-  <script src="/assets/js/leaderboard.mock.js"></script>
+  <!-- Overlay 15: One-truth wiring
+       - No silent mock fallback
+       - Mock allowed ONLY via /leaderboard/?mock=1 (handled inside leaderboard.live.js)
+  -->
   <script src="/assets/js/leaderboard.live.js"></script>
 </body>
 </html>

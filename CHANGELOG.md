@@ -84,3 +84,10 @@
 - Standardized Netlify Blobs store name to `teams` (removes `primaryvote` split).
 - Aligned leaderboard/export logic with existing index schemas: `teams/index.json` uses `{ items: [...] }`, submissions index uses `{ items: [...] }`.
 - Leaderboard now applies official-only bonuses (8-county sweep + posting streak) to official score.
+
+## Overlay 16: Submission Consistency + Edge Case Hardening (2026-02-10)
+- Normalized submission links (canonical-ish URL cleanup) to reduce duplicate and mismatch issues.
+- Added server-side guard against duplicate submissions per team (same primary link).
+- Hardened submissions list: de-dupes index items, heals missing-record drift, and sorts results consistently.
+- Ensured admin review updates also refresh `updatedAt`.
+- Made leaderboard-get response shape more resilient by returning both `teams` and `items`, plus points aliases.

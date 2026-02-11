@@ -26,14 +26,28 @@ export default async (req, context) => {
 
   // Fetch each submission (small volume; can optimize later)
   const items = Array.isArray(idx.items) ? idx.items : [];
-  const subs = [];
-
+  // Dedupe index (defensive against retries/drift)
+  const seen = new Set();
+  const deduped = [];
   for (const it of items) {
+    const id = it?.submissionId;
+    if (!id || seen.has(id)) continue;
+    seen.add(id);
+    deduped.push(it);
+  }
+  const subs = [];
+  const aliveIndex = [];
+
+  for (const it of deduped) {
     const id = it?.submissionId;
     if (!id) continue;
     const key = `submissions/${teamId}/${id}.json`;
     const sub = await store.get(key, { type: "json" });
-    if (!sub) continue;
+    if (!sub) {
+      // Heal drift: index points at a missing record.
+      continue;
+    }
+    aliveIndex.push(it);
 
     // Backfill computed scoring fields for older submissions
     if (typeof sub.calculatedPoints !== "number") {
@@ -50,6 +64,13 @@ export default async (req, context) => {
 
     subs.push(sub);
   }
+
+  // If the index was dirty (dupes or missing records), write back the healed index.
+  if (aliveIndex.length !== items.length) {
+    await store.set(idxKey, JSON.stringify({ items: aliveIndex }), { contentType: "application/json" }).catch(() => {});
+  }
+
+  subs.sort((a, b) => String(b.createdAt || "").localeCompare(String(a.createdAt || "")));
 
   return json(200, { teamId, submissions: subs });
 };
