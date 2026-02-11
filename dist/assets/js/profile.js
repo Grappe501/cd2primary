@@ -13,8 +13,15 @@ const teamStateEl = document.getElementById("teamState");
 const teamMetaEl = document.getElementById("teamMeta");
 const scoreBox = document.getElementById("scoreBox");
 
+// Onboarding checklist (Overlay 19)
+const chkAuth = document.getElementById("chk_auth");
+const chkTeam = document.getElementById("chk_team");
+const chkMembers = document.getElementById("chk_members");
+const chkSubmit = document.getElementById("chk_submit");
+
 let loadedTeam = null;
 let submissions = null;
+let lastSubmissions = [];
 
 function esc(s) {
   return String(s ?? "")
@@ -28,6 +35,27 @@ function esc(s) {
 function setStatus(text, { ok = true } = {}) {
   statusEl.textContent = text;
   statusEl.classList.toggle("success", ok);
+}
+
+function setCheck(el, done) {
+  if (!el) return;
+  el.classList.toggle("done", Boolean(done));
+}
+
+function renderChecklist() {
+  const user = currentUser();
+  const hasTeam = Boolean(loadedTeam);
+  const membersOk =
+    Boolean(loadedTeam?.member1Name) &&
+    Boolean(loadedTeam?.member2Name) &&
+    Boolean(loadedTeam?.member1TikTok) &&
+    Boolean(loadedTeam?.member2TikTok);
+  const hasSubmission = Array.isArray(lastSubmissions) && lastSubmissions.length > 0;
+
+  setCheck(chkAuth, Boolean(user));
+  setCheck(chkTeam, hasTeam);
+  setCheck(chkMembers, hasTeam && membersOk);
+  setCheck(chkSubmit, hasTeam && hasSubmission);
 }
 
 function clearErrors() {
@@ -93,27 +121,27 @@ function renderScore(score) {
   }
 
   scoreBox.innerHTML = `
-    <div class="card" style="margin-top:1rem;">
-      <h3 style="margin:0 0 .5rem 0;">Score</h3>
-      <div class="grid" style="grid-template-columns: repeat(4, minmax(0,1fr)); gap:.75rem;">
-        <div class="card" style="padding:.75rem; margin:0;">
+    <div class="card mt-3">
+      <h3 class="mt-0" style="margin-bottom:.5rem;">Score</h3>
+      <div class="score-grid">
+        <div class="card stat">
           <div class="help">Official (approved)</div>
-          <div style="font-size:1.5rem;"><strong>${esc(score.officialPoints)}</strong></div>
+          <div class="value"><strong>${esc(score.officialPoints)}</strong></div>
         </div>
-        <div class="card" style="padding:.75rem; margin:0;">
+        <div class="card stat">
           <div class="help">Provisional (incl. pending)</div>
-          <div style="font-size:1.5rem;"><strong>${esc(score.provisionalPoints)}</strong></div>
+          <div class="value"><strong>${esc(score.provisionalPoints)}</strong></div>
         </div>
-        <div class="card" style="padding:.75rem; margin:0;">
+        <div class="card stat">
           <div class="help">Streak bonus</div>
-          <div style="font-size:1.5rem;"><strong>${esc(score.postingStreakBonus || 0)}</strong></div>
+          <div class="value"><strong>${esc(score.postingStreakBonus || 0)}</strong></div>
         </div>
-        <div class="card" style="padding:.75rem; margin:0;">
+        <div class="card stat">
           <div class="help">8-county sweep bonus</div>
-          <div style="font-size:1.5rem;"><strong>${esc(score.eightCountySweepBonus)}</strong></div>
+          <div class="value"><strong>${esc(score.eightCountySweepBonus)}</strong></div>
         </div>
       </div>
-      <div class="help" style="margin-top:.75rem;">Official points only count once a submission is approved (admin review comes later). Provisional points help you self-check.</div>
+      <div class="help mt-3">Official points only count once a submission is approved (admin review comes later). Provisional points help you self-check.</div>
     </div>
   `;
 }
@@ -153,6 +181,7 @@ async function loadTeam() {
 
     // Hide submissions until a team exists.
     submissions?.setTeam(null);
+    renderChecklist();
     return;
   }
 
@@ -164,6 +193,7 @@ async function loadTeam() {
   // Enable submissions hub
   submissions?.setTeam(loadedTeam);
   await loadScore();
+  renderChecklist();
 }
 
 async function saveTeam(e) {
@@ -215,12 +245,15 @@ function renderAuth() {
     signedOutEl.hidden = false;
     signedInEl.hidden = true;
     renderScore(null);
+    renderChecklist();
     return;
   }
 
   setStatus(`Signed in as ${user.email}`);
   signedOutEl.hidden = true;
   signedInEl.hidden = false;
+
+  renderChecklist();
 
   loadTeam();
 }
@@ -230,7 +263,11 @@ const identity = initIdentity();
 
 submissions = initSubmissions({
   api,
-  onChanged: () => loadScore()
+  onChanged: (items = []) => {
+    lastSubmissions = Array.isArray(items) ? items : [];
+    renderChecklist();
+    loadScore();
+  }
 });
 
 btnSignIn?.addEventListener("click", () => identity && identity.open());

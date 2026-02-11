@@ -1,3 +1,4 @@
+/* src/assets/css/layout.css */
 /* Layout + utilities */
 .container{
   width: min(var(--container), calc(100% - 2rem));
@@ -11,10 +12,16 @@
   gap: var(--space-4);
 }
 
+.grid.cols-2{
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .grid.cols-3{
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
+
 @media (max-width: 900px){
+  .grid.cols-2{ grid-template-columns: 1fr; }
   .grid.cols-3{ grid-template-columns: 1fr; }
 }
 
@@ -23,3 +30,6 @@
 .spread{ display:flex; gap: var(--space-3); align-items:center; justify-content:space-between; flex-wrap:wrap; }
 
 .hr{ height:1px; background: var(--border); margin: var(--space-5) 0; border:0; }
+
+/* Typography helpers */
+.muted{ color: var(--muted); }

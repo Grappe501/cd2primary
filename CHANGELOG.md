@@ -155,3 +155,26 @@ Each overlay is atomic and deployable.
 - Bonus misfire prevention
 - Strict provisional vs official separation enforcement
 - Audit integrity reinforced
+
+---
+
+## Overlay 17 — Design System Completion + Routing Fix
+- Fixed /app/profile/* routing conflict caused by rewrite ordering
+- Added missing layout utility for two-column grids
+- Removed remaining inline layout drift in /app/* pages
+- Minor design system consistency cleanup for the profile UI
+
+---
+
+## Overlay 18 — Launch Polish
+- Small UX + copy polish across public pages
+- Reduced visual drift introduced by earlier brand refresh
+- General “ship it” refinements (no schema/scoring changes)
+
+---
+
+## Overlay 19 — Onboarding Friction Killer
+- Added first-time user walkthrough on /app/ with hover/focus help bubbles
+- Added a “Your next steps” checklist on /app/profile/ that updates automatically
+- Added tooltip explanations to key Team Profile and Submission fields
+- Introduced small, DS-aligned onboarding utility classes (tip, callout, checklist, score grid)

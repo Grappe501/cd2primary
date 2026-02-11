@@ -1,147 +1,206 @@
-/* Live leaderboard loader with graceful fallback to mock data.
- * Requires existing design system CSS already in the project.
+/* src/assets/js/leaderboard.live.js */
+/* Overlay 15: Leaderboard One-Truth Wiring
+ *
+ * Goals:
+ * - Live data is the only default source of truth
+ * - No silent fallback to mock
+ * - If live fails, show an explicit warning (and do not show fake scores)
+ * - Allow mock ONLY with ?mock=1 (explicit, visible)
+ * - Display generatedAt (“last updated”) from leaderboard-get
  */
-(function () {
-  const API = "/.netlify/functions/leaderboard-get";
 
-  function qs(sel, root = document) { return root.querySelector(sel); }
-  function qsa(sel, root = document) { return Array.from(root.querySelectorAll(sel)); }
+(() => {
+  const API_URL = "/.netlify/functions/leaderboard-get";
 
-  function fmt(n) {
+  const statusEl = document.querySelector("[data-leaderboard-status]");
+  const bodyEl = document.querySelector("[data-leaderboard-body]");
+  const searchEl = document.querySelector("[data-leaderboard-search]");
+  const sortEl = document.querySelector("[data-leaderboard-sort]");
+
+  function setStatus(msg) {
+    if (statusEl) statusEl.textContent = msg || "";
+  }
+
+  function esc(s) {
+    return String(s ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function num(n) {
     const x = Number(n || 0);
-    return Number.isFinite(x) ? x.toLocaleString() : "0";
+    return Number.isFinite(x) ? x : 0;
   }
 
-  async function fetchJSON(url) {
-    const res = await fetch(url, { headers: { "Accept": "application/json" }});
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return res.json();
+  function fmtInt(n) {
+    return num(n).toLocaleString();
   }
 
-  function renderTop5(container, teams) {
-    if (!container) return;
-    const top = (teams || []).slice(0, 5);
-    if (!top.length) {
-      container.innerHTML = '<div class="cj-card"><div class="cj-card__body"><p class="cj-muted">No teams yet.</p></div></div>';
+  function normalizeTeam(t) {
+    return {
+      teamId: t.teamId ?? t.id ?? "",
+      teamName: t.teamName ?? t.name ?? "Unnamed Team",
+      homeCounty: t.homeCounty ?? t.county ?? "",
+      officialPoints: num(t.officialPoints ?? t.totalPoints ?? t.points ?? 0),
+      provisionalPoints: num(
+        t.provisionalPoints ??
+          t.provisional ??
+          t.pendingTotalPoints ??
+          t.officialPoints ??
+          t.totalPoints ??
+          0
+      ),
+      approvedCount: num(t.approvedCount ?? t.approved ?? 0),
+      pendingCount: num(t.pendingCount ?? t.pending ?? 0),
+    };
+  }
+
+  function renderRows(items) {
+    if (!bodyEl) return;
+
+    if (!Array.isArray(items) || items.length === 0) {
+      bodyEl.innerHTML = `<tr><td colspan="7" class="muted">No teams yet.</td></tr>`;
       return;
     }
-    container.innerHTML = top.map((t, i) => `
-      <div class="cj-card cj-card--tight">
-        <div class="cj-card__body">
-          <div class="cj-row cj-row--between cj-row--center">
-            <div>
-              <div class="cj-kicker">#${i + 1}</div>
-              <div class="cj-h3">${escapeHtml(t.teamName || "Unnamed Team")}</div>
-              <div class="cj-muted">${escapeHtml(t.homeCounty || "")}</div>
-            </div>
-            <div class="cj-score">
-              <div class="cj-score__num">${fmt(t.officialScore)}</div>
-              <div class="cj-score__label">Official</div>
-            </div>
-          </div>
-          <div class="cj-muted cj-mt-2">Provisional: <strong>${fmt(t.provisionalScore)}</strong></div>
-        </div>
-      </div>
-    `).join("");
+
+    bodyEl.innerHTML = items
+      .map((t, idx) => {
+        return `
+          <tr>
+            <td class="num">${idx + 1}</td>
+            <td>${esc(t.teamName)}</td>
+            <td>${esc(t.homeCounty)}</td>
+            <td class="num">${fmtInt(t.officialPoints)}</td>
+            <td class="num">${fmtInt(t.provisionalPoints)}</td>
+            <td class="num">${fmtInt(t.approvedCount)}</td>
+            <td class="num">${fmtInt(t.pendingCount)}</td>
+          </tr>
+        `;
+      })
+      .join("");
   }
 
-  function renderLeaderboardTable(tbody, teams) {
-    if (!tbody) return;
-    const rows = (teams || []).map((t, idx) => `
-      <tr>
-        <td>${idx + 1}</td>
-        <td>${escapeHtml(t.teamName || "Unnamed Team")}</td>
-        <td>${escapeHtml(t.homeCounty || "")}</td>
-        <td><strong>${fmt(t.officialScore)}</strong></td>
-        <td>${fmt(t.provisionalScore)}</td>
-        <td>${fmt(t.approvedCount)}</td>
-        <td>${fmt(t.pendingCount)}</td>
-      </tr>
-    `).join("");
-    tbody.innerHTML = rows || `<tr><td colspan="7" class="cj-muted">No teams yet.</td></tr>`;
-  }
+  function applyFilterAndSort(all, q, sortKey) {
+    let out = all;
 
-  function escapeHtml(s) {
-    return String(s ?? "").replace(/[&<>"']/g, (c) => ({
-      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
-    }[c]));
-  }
-
-  function wireSearchAndSort(teams, opts) {
-    const { searchInput, sortSelect, onUpdate } = opts;
-    let state = { q: "", sort: "official_desc" };
-
-    function apply() {
-      const q = state.q.trim().toLowerCase();
-      let filtered = teams.slice();
-      if (q) {
-        filtered = filtered.filter(t =>
-          (t.teamName || "").toLowerCase().includes(q) ||
-          (t.homeCounty || "").toLowerCase().includes(q)
+    const query = (q || "").trim().toLowerCase();
+    if (query) {
+      out = out.filter((t) => {
+        return (
+          (t.teamName || "").toLowerCase().includes(query) ||
+          (t.homeCounty || "").toLowerCase().includes(query)
         );
-      }
-      switch (state.sort) {
-        case "official_desc":
-          filtered.sort((a,b) => (b.officialScore||0)-(a.officialScore||0));
-          break;
+      });
+    }
+
+    const key = sortKey || "official_desc";
+    out = [...out].sort((a, b) => {
+      switch (key) {
         case "provisional_desc":
-          filtered.sort((a,b) => (b.provisionalScore||0)-(a.provisionalScore||0));
-          break;
+          return b.provisionalPoints - a.provisionalPoints;
         case "name_asc":
-          filtered.sort((a,b) => String(a.teamName||"").localeCompare(String(b.teamName||"")));
-          break;
+          return a.teamName.localeCompare(b.teamName);
         case "county_asc":
-          filtered.sort((a,b) => String(a.homeCounty||"").localeCompare(String(b.homeCounty||"")));
-          break;
+          return a.homeCounty.localeCompare(b.homeCounty);
+        case "official_desc":
+        default:
+          return b.officialPoints - a.officialPoints;
       }
-      onUpdate(filtered);
-    }
+    });
 
-    if (searchInput) {
-      searchInput.addEventListener("input", () => {
-        state.q = searchInput.value || "";
-        apply();
-      });
-    }
-    if (sortSelect) {
-      sortSelect.addEventListener("change", () => {
-        state.sort = sortSelect.value || "official_desc";
-        apply();
-      });
-    }
-
-    apply();
+    return out;
   }
 
-  async function main() {
-    const top5Root = qs("[data-top5]");
-    const tableBody = qs("[data-leaderboard-body]");
-    const searchInput = qs("[data-leaderboard-search]");
-    const sortSelect = qs("[data-leaderboard-sort]");
-    const statusEl = qs("[data-leaderboard-status]");
+  async function fetchLive() {
+    const res = await fetch(API_URL, {
+      headers: { accept: "application/json" },
+    });
+    if (!res.ok) throw new Error(`Live fetch failed: ${res.status}`);
+    const data = await res.json();
+    const items = Array.isArray(data.items) ? data.items.map(normalizeTeam) : [];
+    return { items, generatedAt: data.generatedAt };
+  }
 
+  async function fetchMockTeamsJson() {
+    const res = await fetch("/data/mock/teams.json", {
+      headers: { accept: "application/json" },
+    });
+    if (!res.ok) throw new Error(`Mock teams.json fetch failed: ${res.status}`);
+    const data = await res.json();
+    const items = Array.isArray(data) ? data.map(normalizeTeam) : [];
+    return { items };
+  }
+
+  async function init() {
+    const params = new URLSearchParams(window.location.search);
+    const allowMock = params.get("mock") === "1";
+
+    setStatus("Loading live scores…");
+
+    let livePayload;
     try {
-      if (statusEl) statusEl.textContent = "Loading live scores…";
-      const data = await fetchJSON(API);
-      const teams = Array.isArray(data.teams) ? data.teams : [];
+      livePayload = await fetchLive();
+    } catch (err) {
+      if (!allowMock) {
+        setStatus("⚠️ Live scores unavailable. No mock data shown.");
+        if (bodyEl) {
+          bodyEl.innerHTML = `<tr><td colspan="7" class="muted">Live scores unavailable.</td></tr>`;
+        }
+        return;
+      }
 
-      // Default sort: official score desc
-      teams.sort((a,b) => (b.officialScore||0)-(a.officialScore||0));
+      setStatus("Mock mode • Not live data");
 
-      renderTop5(top5Root, teams);
-      wireSearchAndSort(teams, {
-        searchInput,
-        sortSelect,
-        onUpdate: (list) => renderLeaderboardTable(tableBody, list)
+      try {
+        const mock = await fetchMockTeamsJson();
+        wireUI(mock.items);
+        return;
+      } catch (mockErr) {
+        setStatus("⚠️ Mock data unavailable.");
+        if (bodyEl) {
+          bodyEl.innerHTML = `<tr><td colspan="7" class="muted">Mock data unavailable.</td></tr>`;
+        }
+        return;
+      }
+    }
+
+    if (livePayload.generatedAt) {
+      const d = new Date(livePayload.generatedAt);
+      setStatus(`Live • Updated ${d.toLocaleString()}`);
+    } else {
+      setStatus("Live • Update time unavailable");
+    }
+
+    wireUI(livePayload.items);
+  }
+
+  function wireUI(allItems) {
+    const sortKey = sortEl?.value || "official_desc";
+    const q = searchEl?.value || "";
+    renderRows(applyFilterAndSort(allItems, q, sortKey));
+
+    if (searchEl) {
+      searchEl.addEventListener("input", () => {
+        const sortKeyNow = sortEl?.value || "official_desc";
+        renderRows(applyFilterAndSort(allItems, searchEl.value, sortKeyNow));
       });
+    }
 
-      if (statusEl) statusEl.textContent = data.generatedAt ? `Updated ${data.generatedAt}` : "Updated";
-    } catch (e) {
-      console.warn("Live leaderboard failed, falling back to mock if available.", e);
-      if (statusEl) statusEl.textContent = "Live scores unavailable — showing mock data (if configured).";
-      // If the page already includes the mock script, it will render on its own.
+    if (sortEl) {
+      sortEl.addEventListener("change", () => {
+        const qNow = searchEl?.value || "";
+        renderRows(applyFilterAndSort(allItems, qNow, sortEl.value));
+      });
     }
   }
 
-  document.addEventListener("DOMContentLoaded", main);
+  init().catch(() => {
+    setStatus("⚠️ Live scores unavailable. No mock data shown.");
+    if (bodyEl) {
+      bodyEl.innerHTML = `<tr><td colspan="7" class="muted">Live scores unavailable.</td></tr>`;
+    }
+  });
 })();

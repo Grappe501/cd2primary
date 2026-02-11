@@ -1,0 +1,48 @@
+/* Overlay 13: Style Unification Hotfix
+   Purpose: ensure pages referencing /assets/css/styles.css load correctly.
+   This file intentionally:
+   1) Imports the canonical design system entrypoint (site.css)
+   2) Provides a minimal compatibility layer for legacy `cj-*` classnames
+*/
+
+@import url("./site.css");
+
+/* ---- Legacy CJ compatibility layer (minimal, readable, brand-consistent) ---- */
+
+.cj-page { min-height: 100vh; background: var(--bg); color: var(--text); }
+.cj-header { border-bottom: 1px solid var(--border); background: var(--surface); }
+.cj-container { width: min(1100px, 100% - 2rem); margin-inline: auto; padding: 1.25rem 0; }
+
+.cj-nav { display: flex; flex-wrap: wrap; gap: .75rem; align-items: center; justify-content: flex-start; }
+.cj-nav a { color: var(--text); text-decoration: none; font-weight: 650; }
+.cj-nav a:hover { text-decoration: underline; }
+
+.cj-hero { padding: 1.25rem 0 0; }
+.cj-kicker { color: var(--muted); font-weight: 650; margin: 0 0 .5rem; }
+.cj-title { margin: .25rem 0 .5rem; letter-spacing: -0.02em; }
+.cj-subtitle { color: var(--muted); margin: 0 0 1rem; max-width: 65ch; }
+
+.cj-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); padding: 1rem; }
+.cj-card + .cj-card { margin-top: 1rem; }
+
+.cj-btn { display: inline-flex; gap: .5rem; align-items: center; justify-content: center;
+  padding: .65rem 1rem; border-radius: var(--radius-md); border: 1px solid var(--border);
+  background: var(--surface); color: var(--text); text-decoration: none; font-weight: 700;
+}
+.cj-btn:hover { box-shadow: var(--shadow-sm); }
+.cj-btn.primary { background: var(--brand); border-color: var(--brand); color: #fff; }
+.cj-btn.primary:hover { filter: brightness(0.98); }
+.cj-btn.ghost { background: transparent; }
+
+.cj-badge { display: inline-flex; align-items: center; padding: .2rem .55rem; border-radius: 999px;
+  border: 1px solid var(--border); background: var(--surface); color: var(--muted); font-weight: 700; font-size: .8rem;
+}
+
+.cj-grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+
+.cj-footer { margin-top: 2rem; border-top: 1px solid var(--border); background: var(--surface); }
+.cj-footer .cj-container { padding: 1rem 0; color: var(--muted); font-size: .95rem; }
+
+/* Links inside legacy CJ blocks */
+.cj-page a { color: var(--brand); }
+.cj-page a:hover { text-decoration: underline; }

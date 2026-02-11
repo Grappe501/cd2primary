@@ -26,9 +26,9 @@
     </header>
 
     <main class="container">
-      <section class="section" style="padding-top:2rem;">
+      <section class="section pad-top">
         <div class="card">
-          <div class="spread" style="gap:1rem; align-items:flex-start;">
+          <div class="spread top">
             <div>
               <h1 style="margin:0;">Team Profile</h1>
               <p class="lede" style="margin: .5rem 0 0 0;">
@@ -37,7 +37,7 @@
               <div id="scoreBox" style="margin-top:1rem;"></div>
 
             </div>
-            <div class="row" style="flex-wrap:wrap;">
+            <div class="row wrap">
               <button class="btn" id="btnAccount" type="button">Account</button>
               <button class="btn" id="btnLogout" type="button">Log out</button>
               <a class="btn" href="/leaderboard/">Leaderboard</a>
@@ -48,26 +48,26 @@
 
           <div id="status" class="badge" aria-live="polite">Checking login status…</div>
 
-          <div id="signedOut" style="margin-top:1rem;" hidden>
+          <div id="signedOut" class="mt-3" hidden>
             <p style="margin:0 0 .75rem 0;">
               You must sign in to create or edit your team.
             </p>
-            <div class="row" style="flex-wrap:wrap;">
+            <div class="row wrap">
               <a class="btn primary" href="/app/">Go to Join / Sign In</a>
               <button class="btn" id="btnSignIn" type="button">Sign In Here</button>
             </div>
           </div>
 
-          <div id="signedIn" style="margin-top:1rem;" hidden>
+          <div id="signedIn" class="mt-3" hidden>
             <div class="grid cols-2" style="align-items:start;">
               <div>
                 <h2 style="margin-top:0;">Team Info</h2>
                 <form id="teamForm">
-                  <label class="label" for="teamName">Team Name</label>
+                  <label class="label" for="teamName">Team Name <span class="tip" tabindex="0" data-tip="Pick a name you can say on camera. This is how points are credited and how you appear on the leaderboard.">?</span></label>
                   <input class="input" id="teamName" name="teamName" required />
                   <div class="help" id="err_teamName"></div>
 
-                  <label class="label" for="homeCounty" style="margin-top:.75rem;">Home County</label>
+                  <label class="label" for="homeCounty" style="margin-top:.75rem;">Home County <span class="tip" tabindex="0" data-tip="Your home county is where your team is based. This powers county coordination and county sweep bonuses.">?</span></label>
                   <select class="input" id="homeCounty" name="homeCounty" required>
                     <option value="">Select a county…</option>
                     <option value="cleburne">Cleburne</option>
@@ -89,7 +89,7 @@
                   <input class="input" id="member1Name" name="member1Name" required />
                   <div class="help" id="err_member1Name"></div>
 
-                  <label class="label" for="member1TikTok" style="margin-top:.75rem;">Member 1 TikTok Handle</label>
+                  <label class="label" for="member1TikTok" style="margin-top:.75rem;">Member 1 TikTok Handle <span class="tip" tabindex="0" data-tip="Use the exact @handle. This helps verify posts and protects your points.">?</span></label>
                   <input class="input" id="member1TikTok" name="member1TikTok" placeholder="@handle" required />
                   <div class="help" id="err_member1TikTok"></div>
 
@@ -97,11 +97,11 @@
                   <input class="input" id="member2Name" name="member2Name" required />
                   <div class="help" id="err_member2Name"></div>
 
-                  <label class="label" for="member2TikTok" style="margin-top:.75rem;">Member 2 TikTok Handle</label>
+                  <label class="label" for="member2TikTok" style="margin-top:.75rem;">Member 2 TikTok Handle <span class="tip" tabindex="0" data-tip="Teams are exactly two. Both handles are required so we can credit and verify your work.">?</span></label>
                   <input class="input" id="member2TikTok" name="member2TikTok" placeholder="@handle" required />
                   <div class="help" id="err_member2TikTok"></div>
 
-                  <div class="row" style="margin-top:1.25rem; flex-wrap:wrap;">
+                  <div class="row wrap" style="margin-top:1.25rem;">
                     <button class="btn primary" id="btnSave" type="submit">Save Team Profile</button>
                     <button class="btn" id="btnReload" type="button">Reload</button>
                   </div>
@@ -117,6 +117,17 @@
                   <h2 style="margin-top:0;">Current Status</h2>
                   <div class="badge" id="teamState">Loading…</div>
                   <div style="margin-top:.75rem;" class="help" id="teamMeta"></div>
+                </div>
+
+                <div class="card" style="margin-bottom:1rem;">
+                  <h2 style="margin-top:0;">Your next steps</h2>
+                  <ul class="checklist" id="onboardingChecklist">
+                    <li class="check" id="chk_auth"><span class="dot" aria-hidden="true"></span><div><strong>Signed in</strong><small>Use the same email every time.</small></div></li>
+                    <li class="check" id="chk_team"><span class="dot" aria-hidden="true"></span><div><strong>Team profile saved</strong><small>No team = no points ledger.</small></div></li>
+                    <li class="check" id="chk_members"><span class="dot" aria-hidden="true"></span><div><strong>Both members + handles</strong><small>Two humans, two @handles.</small></div></li>
+                    <li class="check" id="chk_submit"><span class="dot" aria-hidden="true"></span><div><strong>Submit your first video</strong><small>Paste links from any platform.</small></div></li>
+                  </ul>
+                  <p class="help" style="margin-top:.75rem;">Hover or focus the <strong>?</strong> bubbles for quick explanations.</p>
                 </div>
 
                 <div class="card">
@@ -189,7 +200,10 @@
                         <input class="input" id="submissionDate" name="submissionDate" type="date" required />
                         <div class="help" id="err_submissionDate"></div>
 
-                        <label class="label" for="expectedPoints" style="margin-top:.75rem;">Expected Points (what you believe you earned)</label>
+                        <label class="label" for="expectedPoints" style="margin-top:.75rem;">
+                          Expected Points (what you believe you earned)
+                          <span class="tip" tabindex="0" data-tip="This is a self-check. The server calculates the official score deterministically. If this looks wrong, use the ‘Expected points’ hint to spot missing hashtags, cross-posts, or required fields.">?</span>
+                        </label>
                         <input class="input" id="expectedPoints" name="expectedPoints" type="number" min="0" step="1" required />
                         <div class="help" id="err_expectedPoints"></div>
                         <div id="expectedHint" class="help" style="margin-top:.35rem;"></div>
@@ -250,6 +264,7 @@
                         <label class="row" style="align-items:center; gap:.5rem; margin-top:.75rem;">
                           <input type="checkbox" id="confirmHashtags" name="confirmHashtags" required />
                           I confirm the caption includes <strong>#PrimaryVote!</strong> and <strong>#ChrisJonesforCongress</strong>.
+                          <span class="tip" tabindex="0" data-tip="If you don’t include the required hashtags, the server will score the submission as 0. This protects fairness and prevents arguments.">?</span>
                         </label>
                         <div class="help" id="err_confirmHashtags"></div>
 

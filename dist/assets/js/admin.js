@@ -1,3 +1,4 @@
+/* src/assets/js/admin.js */
 (function () {
   const FN = {
     whoami: "/.netlify/functions/admin-whoami",
@@ -8,9 +9,9 @@
   };
 
   function qs(s, r=document){ return r.querySelector(s); }
+  function qsa(s, r=document){ return Array.from(r.querySelectorAll(s)); }
   function escapeHtml(s){ return String(s??"").replace(/[&<>"']/g, c=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c])); }
   function fmt(n){ const x=Number(n||0); return Number.isFinite(x)?x.toLocaleString():"0"; }
-  function toISO(d){ try { return new Date(d).toISOString(); } catch { return ""; } }
   function prettyDate(d){ try { return new Date(d).toLocaleString(); } catch { return ""; } }
 
   async function authedFetch(url, opts={}) {
@@ -30,26 +31,24 @@
 
   function platformBadges(platforms) {
     const list = Array.isArray(platforms) ? platforms : [];
-    if (!list.length) return '<span class="cj-muted">—</span>';
-    return list.map(p => `<span class="cj-badge">${escapeHtml(p)}</span>`).join(" ");
+    if (!list.length) return '<span class="muted">—</span>';
+    return list.map(p => `<span class="badge">${escapeHtml(p)}</span>`).join(" ");
   }
 
   function renderAudit(panel, bodyEl, audits) {
     panel.hidden = false;
     if (!audits.length) {
-      bodyEl.innerHTML = `<p class="cj-muted">No audit entries found.</p>`;
+      bodyEl.innerHTML = `<p class="muted">No audit entries found.</p>`;
       return;
     }
     bodyEl.innerHTML = audits.map(a => `
-      <div class="cj-card cj-card--tight cj-mb-2">
-        <div class="cj-card__body">
-          <div class="cj-row cj-row--between cj-row--center">
-            <div><strong>${escapeHtml(a.action || "ACTION")}</strong></div>
-            <div class="cj-muted">${escapeHtml(prettyDate(a.at || a.timestamp || ""))}</div>
-          </div>
-          ${a.note ? `<div class="cj-mt-1">${escapeHtml(a.note)}</div>` : ""}
-          ${a.byEmail ? `<div class="cj-muted cj-mt-1">by ${escapeHtml(a.byEmail)}</div>` : ""}
+      <div class="card">
+        <div class="spread">
+          <div><strong>${escapeHtml(a.action || "ACTION")}</strong></div>
+          <div class="muted">${escapeHtml(prettyDate(a.at || a.timestamp || ""))}</div>
         </div>
+        ${a.note ? `<div>${escapeHtml(a.note)}</div>` : ""}
+        ${a.byEmail ? `<div class="muted">by ${escapeHtml(a.byEmail)}</div>` : ""}
       </div>
     `).join("");
   }
@@ -68,31 +67,38 @@
         return hay.includes(needle);
       });
     }
-    // newest first
     items.sort((a,b)=> new Date(b.createdAt||0) - new Date(a.createdAt||0));
     return items;
+  }
+
+  function statusPill(statusRaw) {
+    const status = (statusRaw || "pending").toLowerCase();
+    const label = status.toUpperCase();
+    const safe = status === "approved" ? "approved" : status === "rejected" ? "rejected" : "pending";
+    return `<span class="pill ${safe}">${escapeHtml(label)}</span>`;
   }
 
   function rowHtml(s) {
     const links = s.links || {};
     const points = s.calculatedPoints ?? s.points ?? 0;
+    const platforms = s.platforms || Object.keys(links);
     return `
       <tr>
         <td>${escapeHtml(prettyDate(s.createdAt))}</td>
         <td>
           <div><strong>${escapeHtml(s.teamName || "Team")}</strong></div>
-          <div class="cj-muted">${escapeHtml(s.homeCounty || "")}</div>
+          <div class="muted">${escapeHtml(s.homeCounty || "")}</div>
         </td>
         <td>${escapeHtml(s.type || "")}</td>
-        <td>${platformBadges(s.platforms || Object.keys(links))}</td>
-        <td><span class="cj-badge cj-badge--${escapeHtml(s.status || "pending")}">${escapeHtml((s.status||"pending").toUpperCase())}</span></td>
-        <td><strong>${fmt(points)}</strong></td>
+        <td>${platformBadges(platforms)}</td>
+        <td>${statusPill(s.status)}</td>
+        <td class="num"><strong>${fmt(points)}</strong></td>
         <td>
-          <div class="cj-row cj-gap-1 cj-row--wrap">
-            <button class="cj-btn cj-btn--xs cj-btn--primary" data-action="approve" data-team="${escapeHtml(s.teamId)}" data-sub="${escapeHtml(s.submissionId)}">Approve</button>
-            <button class="cj-btn cj-btn--xs cj-btn--danger" data-action="reject" data-team="${escapeHtml(s.teamId)}" data-sub="${escapeHtml(s.submissionId)}">Reject</button>
-            <button class="cj-btn cj-btn--xs cj-btn--ghost" data-action="pending" data-team="${escapeHtml(s.teamId)}" data-sub="${escapeHtml(s.submissionId)}">Pending</button>
-            <button class="cj-btn cj-btn--xs cj-btn--ghost" data-action="audit" data-team="${escapeHtml(s.teamId)}" data-sub="${escapeHtml(s.submissionId)}">Audit</button>
+          <div class="row">
+            <button class="btn sm primary" data-action="approve" data-team="${escapeHtml(s.teamId)}" data-sub="${escapeHtml(s.submissionId)}">Approve</button>
+            <button class="btn sm danger" data-action="reject" data-team="${escapeHtml(s.teamId)}" data-sub="${escapeHtml(s.submissionId)}">Reject</button>
+            <button class="btn sm ghost" data-action="pending" data-team="${escapeHtml(s.teamId)}" data-sub="${escapeHtml(s.submissionId)}">Pending</button>
+            <button class="btn sm ghost" data-action="audit" data-team="${escapeHtml(s.teamId)}" data-sub="${escapeHtml(s.submissionId)}">Audit</button>
           </div>
         </td>
       </tr>
@@ -127,7 +133,10 @@
     const all = Array.isArray(data.submissions) ? data.submissions : [];
     const items = applyFilterAndSearch(all, status, q);
 
-    tbody.innerHTML = items.length ? items.map(rowHtml).join("") : `<tr><td colspan="7" class="cj-muted">No submissions found.</td></tr>`;
+    tbody.innerHTML = items.length
+      ? items.map(rowHtml).join("")
+      : `<tr><td colspan="7" class="muted">No submissions found.</td></tr>`;
+
     if (statusEl) statusEl.textContent = `Showing ${items.length} submissions (${status}).`;
     return all;
   }
@@ -152,7 +161,6 @@
   }
 
   async function doExport(kind) {
-    // triggers file download; keep auth header
     const res = await authedFetch(`${FN.export}?format=${encodeURIComponent(kind)}`, { method: "GET" });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const blob = await res.blob();
@@ -169,7 +177,6 @@
   async function main() {
     const statusEl = qs("[data-admin-status]");
     try {
-      // init identity widget if present
       if (window.netlifyIdentity) {
         window.netlifyIdentity.on("login", () => window.location.reload());
       }
@@ -192,7 +199,11 @@
             return;
           }
           btn.disabled = true;
-          await updateStatus(teamId, subId, action === "approve" ? "approved" : action === "reject" ? "rejected" : "pending");
+          await updateStatus(
+            teamId,
+            subId,
+            action === "approve" ? "approved" : action === "reject" ? "rejected" : "pending"
+          );
           await loadAll();
         } catch (err) {
           console.error(err);

@@ -57,3 +57,38 @@ Verify:
 - Audit log records every status change
 - No bonus applied twice
 - No negative or NaN scores possible
+
+---
+
+## Overlay 17 — Design System Completion + Routing Fix
+
+Verify:
+- /app/profile/ loads (no redirect loop)
+- /app/profile/* deep links resolve correctly
+- Two-column layouts render correctly (no missing .cols-2 utility)
+- No inline layout styles remain on /app/* pages
+
+---
+
+## Overlay 18 — Launch Polish
+
+Verify:
+- Public pages render with consistent typography and spacing
+- No broken links or 404s introduced
+- No schema/scoring changes
+
+---
+
+## Overlay 19 — Onboarding Friction Killer
+
+Verify:
+- /app/ shows a first-time walkthrough with hover/focus help bubbles
+- Help bubbles are keyboard accessible (tab + focus)
+- /app/profile/ shows “Your next steps” checklist
+- Checklist updates:
+  - Signed in toggles when user is authed
+  - Team profile saved toggles after create/save
+  - Both members toggles when both names and TikTok handles are present
+  - First submission toggles after at least one submission is listed
+- Tooltip bubbles appear on key form fields (team name, home county, expected points, hashtag confirmation)
+- No changes to scoring, schema, or admin tooling

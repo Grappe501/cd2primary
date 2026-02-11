@@ -1,82 +1,99 @@
+<!-- src/admin/index.html -->
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Admin • Review + Approve</title>
-  <link rel="stylesheet" href="/assets/css/styles.css" />
+  <link rel="stylesheet" href="/assets/css/site.css" />
 </head>
-<body class="cj-page">
-  <header class="cj-header">
-    <div class="cj-container">
-      <a class="cj-brand" href="/">#PrimaryVote! CD2</a>
-      <nav class="cj-nav">
+<body>
+  <header class="nav">
+    <div class="container nav-inner spread">
+      <a class="brand" href="/">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span>AR-02 #PrimaryVote! Scavenger Hunt</span>
+      </a>
+      <nav class="nav-links" aria-label="Primary">
         <a href="/leaderboard/">Leaderboard</a>
         <a href="/app/">Team Portal</a>
-        <a href="/admin/" class="is-active">Admin</a>
+        <a href="/admin/">Admin</a>
+        <a class="btn primary" href="/app/">Join / Sign In</a>
       </nav>
     </div>
   </header>
 
-  <main class="cj-container cj-main">
-    <section class="cj-hero cj-hero--compact">
-      <h1 class="cj-h1">Admin: Review & Approve</h1>
-      <p class="cj-muted">Approve only what’s documented. The rules are the rules.</p>
-      <div class="cj-row cj-gap-2 cj-mt-2">
-        <button class="cj-btn cj-btn--ghost" data-export="csv">Export CSV</button>
-        <button class="cj-btn cj-btn--ghost" data-export="json">Export JSON</button>
-        <button class="cj-btn cj-btn--ghost" data-refresh>Refresh</button>
-      </div>
-      <p class="cj-muted cj-mt-2" data-admin-status></p>
-    </section>
+  <main>
+    <section class="hero">
+      <div class="container stack">
+        <h1>Admin: Review &amp; Approve</h1>
+        <p class="lede">Approve only what’s documented. The rules are the rules.</p>
 
-    <section class="cj-card">
-      <div class="cj-card__body">
-        <div class="cj-row cj-row--between cj-row--wrap cj-gap-2">
-          <select class="cj-select" data-filter>
-            <option value="pending">Pending</option>
-            <option value="approved">Approved</option>
-            <option value="rejected">Rejected</option>
-            <option value="all">All</option>
-          </select>
-          <input class="cj-input" type="search" placeholder="Search team, county, platform…" data-search />
+        <div class="row">
+          <button class="btn ghost sm" data-export="csv">Export CSV</button>
+          <button class="btn ghost sm" data-export="json">Export JSON</button>
+          <button class="btn ghost sm" data-refresh>Refresh</button>
         </div>
 
-        <div class="cj-table-wrap cj-mt-3">
-          <table class="cj-table">
-            <thead>
-              <tr>
-                <th>When</th>
-                <th>Team</th>
-                <th>Type</th>
-                <th>Platforms</th>
-                <th>Status</th>
-                <th>Points</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody data-rows>
-              <tr><td colspan="7" class="cj-muted">Loading…</td></tr>
-            </tbody>
-          </table>
-        </div>
+        <p class="muted" data-admin-status></p>
       </div>
     </section>
 
-    <section class="cj-card cj-mt-3" data-audit-panel hidden>
-      <div class="cj-card__body">
-        <div class="cj-row cj-row--between cj-row--center">
-          <h2 class="cj-h2">Audit History</h2>
-          <button class="cj-btn cj-btn--ghost" data-audit-close>Close</button>
+    <section class="section">
+      <div class="container stack">
+        <div class="card stack">
+          <div class="spread">
+            <select class="select" data-filter>
+              <option value="pending">Pending</option>
+              <option value="approved">Approved</option>
+              <option value="rejected">Rejected</option>
+              <option value="all">All</option>
+            </select>
+            <input class="input" type="search" placeholder="Search team, county, platform…" data-search />
+          </div>
+
+          <div class="table-wrap">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>When</th>
+                  <th>Team</th>
+                  <th>Type</th>
+                  <th>Platforms</th>
+                  <th>Status</th>
+                  <th class="num">Points</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody data-rows>
+                <tr><td colspan="7" class="muted">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
         </div>
-        <div data-audit-body class="cj-mt-2"></div>
+
+        <div class="card stack" data-audit-panel hidden>
+          <div class="spread">
+            <h2>Audit History</h2>
+            <button class="btn ghost sm" data-audit-close>Close</button>
+          </div>
+          <div data-audit-body></div>
+        </div>
       </div>
     </section>
   </main>
 
-  <footer class="cj-footer">
-    <div class="cj-container">
-      <p class="cj-muted">Admin access is allowlisted. Actions are audited.</p>
+  <footer class="footer">
+    <div class="container spread">
+      <div>
+        <div><strong>Chris Jones for Congress</strong></div>
+        <small>Admin access is allowlisted. Actions are audited.</small>
+      </div>
+      <div class="row">
+        <a href="/rules/">Rules</a>
+        <a href="/leaderboard/">Leaderboard</a>
+        <a href="/counties/">Counties</a>
+      </div>
     </div>
   </footer>
 
