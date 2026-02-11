@@ -159,40 +159,13 @@ Each overlay is atomic and deployable.
 ---
 
 ## Overlay 17 — Design System Completion + Routing Fix
-- Fixed /app/profile/* routing conflict caused by rewrite ordering
-- Added missing layout utility for two-column grids
-- Removed remaining inline layout drift in /app/* pages
-- Minor design system consistency cleanup for the profile UI
+- Fixed Netlify rewrite ordering for `/app/profile/*`.
+- Added missing `.grid.cols-2` utility (plus `.grid.cols-4` for score layout).
+- Removed inline layout styles from `/app/`, `/app/profile/`, and the profile script to enforce consistent Design System styling.
 
 ---
 
 ## Overlay 18 — Launch Polish
-- Small UX + copy polish across public pages
-- Reduced visual drift introduced by earlier brand refresh
-- General “ship it” refinements (no schema/scoring changes)
-
----
-
-## Overlay 19 — Onboarding Friction Killer
-- Added first-time user walkthrough on /app/ with hover/focus help bubbles
-- Added a “Your next steps” checklist on /app/profile/ that updates automatically
-- Added tooltip explanations to key Team Profile and Submission fields
-- Introduced small, DS-aligned onboarding utility classes (tip, callout, checklist, score grid)
-
-## Overlay 20 — County Intel DB Foundation + Pulaski Map Scaffold
-
-- Added Neon/Postgres-backed county intel foundation (VEP + registration + election results)
-- Added DB schema and seed examples under /db
-- Added public read-only endpoints for county summary and polling locations
-- Updated all county pages to render a non-overwhelming “County Snapshot” panel
-- Added Pulaski map scaffold (Leaflet) wired to DB locations endpoint
-- Added DS-aligned styles for intel panels and map scaffold
-
----
-
-## Overlay 21 — Elections + Voting Sites + Faulkner Seed
-
-- Added county-scoped elections + voting-sites data model (supports special-day hours)
-- Added public read-only endpoint to fetch voting sites by county + election date
-- Added Faulkner County March 3, 2026 voting sites + hours seed (end-to-end live)
-- Added volunteer-friendly “Where to Vote” panel on Faulkner county page (Early Voting / Election Day tabs)
+- Added site meta description + theme-color + favicon across key pages (Home, Rules, Leaderboard, Team Portal, Profile).
+- Added a styled 404 page (`dist/404.html`).
+- Added SVG favicon at `/assets/favicon.svg`.

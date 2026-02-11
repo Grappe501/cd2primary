@@ -3,6 +3,10 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Join the AR-02 #PrimaryVote! Scavenger Hunt, create your team profile, and submit video links for scoring." />
+  <meta name="theme-color" content="#0b1220" />
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+
     <link rel="stylesheet" href="/assets/css/site.css" />
     <title>Join / Sign In • AR-02 #PrimaryVote! Scavenger Hunt</title>
     <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
@@ -26,88 +30,42 @@
     </header>
 
     <main class="container">
-      <section class="section pad-top">
-        <div class="grid cols-2" style="align-items: start;">
+      <section class="section">
+        <div class="grid cols-2">
           <div class="card">
-            <h1 class="mt-0">Join / Sign In</h1>
+            <h1>Join / Sign In</h1>
             <p class="lede">
               Sign in to create your official Team Profile. All submissions and points tie back to your team.
             </p>
-            <div class="row wrap mt-3">
+            <div class="row">
               <button class="btn primary" id="btnOpen">Open Sign In</button>
               <a class="btn" href="/rules/">Read the Rules</a>
               <a class="btn" href="/leaderboard/">View Leaderboard</a>
             </div>
             <hr class="hr" />
             <div id="status" class="badge" aria-live="polite">Checking login status…</div>
-            <div class="mt-3" id="authedActions" hidden>
-              <p class="muted" style="margin: 0 0 .75rem 0;">
-                You’re signed in. Next step: create your Team Profile (teams of two) so submissions can be credited.
+            <div id="authedActions" hidden>
+              <p>
+                You’re signed in. Head to your profile to create or edit your Team.
               </p>
-              <div class="row wrap">
+              <div class="row">
                 <a class="btn primary" href="/app/profile/">Go to Team Profile</a>
                 <button class="btn" id="btnLogout" type="button">Log out</button>
-              </div>
-            </div>
-
-            <hr class="hr" />
-            <div class="callout">
-              <h2 class="mt-0" style="margin-bottom:.5rem; font-size: 1.05rem;">First time here? Here’s the whole flow.</h2>
-              <div class="steps" aria-label="Onboarding steps">
-                <div class="step">
-                  <div class="step-num">1</div>
-                  <div>
-                    <h3>Create your Team Profile <span class="tip" tabindex="0" data-tip="Every point is tied to a team. No team profile = no way to award points cleanly.">?</span></h3>
-                    <p>Teams are exactly two people. You’ll enter both names and both TikTok handles.</p>
-                  </div>
-                </div>
-                <div class="step">
-                  <div class="step-num">2</div>
-                  <div>
-                    <h3>Pick your home county <span class="tip" tabindex="0" data-tip="We use this for fair leaderboards and county sweep bonuses. It also helps volunteers coordinate locally.">?</span></h3>
-                    <p>Your home county is where your team is based (not necessarily where you post).</p>
-                  </div>
-                </div>
-                <div class="step">
-                  <div class="step-num">3</div>
-                  <div>
-                    <h3>Log every submission you want points for <span class="tip" tabindex="0" data-tip="This is non‑negotiable: Volunteers do not get points unless they list the submission. Admins won’t hunt for your videos.">?</span></h3>
-                    <p>Paste links from any platform. Cross‑posts get a bonus when you list them.</p>
-                  </div>
-                </div>
-                <div class="step">
-                  <div class="step-num">4</div>
-                  <div>
-                    <h3>Admin review (if needed) <span class="tip" tabindex="0" data-tip="Some categories require approval for trust and fairness. Your profile shows status and score changes.">?</span></h3>
-                    <p>Approved submissions update the live leaderboard deterministically.</p>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
 
           <aside class="card">
-            <h2 class="mt-0">What you’ll do next</h2>
+            <h2>What you’ll do next</h2>
             <ol>
-              <li><strong>Sign in</strong> (use the same email every time)</li>
-              <li><strong>Create your Team Profile</strong> (teams of two)</li>
-              <li><strong>Add both TikTok handles</strong> (required for verification)</li>
-              <li><strong>Submit your links</strong> to earn points</li>
+              <li>Create a Team Profile (teams of two)</li>
+              <li>Pick your home county</li>
+              <li>Link your TikTok handles</li>
+              <li>Start earning points (Submissions launch in Overlay 07)</li>
             </ol>
-            <p class="lede mb-0">
-              <strong>Rule of the whole game:</strong> If you don’t list it, you don’t get it.
-              <span class="tip" tabindex="0" data-tip="This keeps scoring enforceable and protects volunteers from ‘who saw what’ arguments. It’s a receipts-only system.">?</span>
+            <p class="lede">
+              If you don’t list it, you don’t get it. The system is built to keep scoring clean and enforceable.
             </p>
-
-            <hr class="hr" />
-            <div class="callout">
-              <h3 class="mt-0" style="margin-bottom:.35rem; font-size: 1rem;">Need help in the moment?</h3>
-              <ul style="margin:0; padding-left:1.25rem;" class="muted">
-                <li>Hover or focus the <strong>?</strong> bubbles for quick explanations.</li>
-                <li>If a page looks “stuck,” refresh once after logging in.</li>
-                <li>Use the same email every time — that email is your team key.</li>
-              </ul>
-            </div>
           </aside>
         </div>
       </section>

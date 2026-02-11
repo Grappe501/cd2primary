@@ -1,13 +1,7 @@
-# netlify.toml
-
 [build]
   command = "npm run build"
   publish = "dist"
   functions = "netlify/functions"
-
-# IMPORTANT:
-# /app/profile/ must NOT be swallowed by the /app/* SPA rewrite.
-# This rule must appear BEFORE the broader /app/* rule.
 
 [[redirects]]
   from = "/app/profile/*"
