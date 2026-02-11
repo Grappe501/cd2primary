@@ -1,16 +1,14 @@
+<!-- src/counties/index.html -->
 <!doctype html>
 <html lang="en">
   <head>
-    
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="stylesheet" href="/assets/css/site.css" />
-<link rel="stylesheet" href="/assets/css/print.css" media="print" />
-
-    <title>Counties • AR-02 #PrimaryVote! Scavenger Hunt</title>
+    <title>Counties • AR-02 #PrimaryVote!</title>
   </head>
   <body>
-    
+
 <header class="nav">
   <div class="container nav-inner spread">
     <a class="brand" href="/">
@@ -27,19 +25,60 @@
   </div>
 </header>
 
-    <main class="container section">
-      <section class="hero" style="padding-top:1.5rem;">
-        <h1>Counties</h1>
-        <p class="lede">
-          Drill down by county to find polling locations and plan coverage. (Locations will be populated from Netlify DB in a later overlay.)
-        </p>
-      </section>
+<main>
+  <section class="hero">
+    <div class="container stack">
+      <h1>Counties (AR-02)</h1>
+      <p class="lede">
+        Arkansas’s 2nd Congressional District includes eight counties. Cover them all for the 8-county sweep bonus.
+      </p>
+      <div class="badges">
+        <span class="badge"><strong>Counties:</strong> 8</span>
+        <span class="badge"><strong>Sweep Bonus:</strong> +50 (one time)</span>
+      </div>
+    </div>
+  </section>
 
-      <section class="grid cols-3" style="margin-top:1rem;">
-        <a class="card" href="/counties/pulaski/"><h2>Pulaski County</h2><p>View polling locations and coverage notes.</p></a><a class="card" href="/counties/faulkner/"><h2>Faulkner County</h2><p>View polling locations and coverage notes.</p></a><a class="card" href="/counties/saline/"><h2>Saline County</h2><p>View polling locations and coverage notes.</p></a><a class="card" href="/counties/white/"><h2>White County</h2><p>View polling locations and coverage notes.</p></a><a class="card" href="/counties/cleburne/"><h2>Cleburne County</h2><p>View polling locations and coverage notes.</p></a><a class="card" href="/counties/perry/"><h2>Perry County</h2><p>View polling locations and coverage notes.</p></a><a class="card" href="/counties/conway/"><h2>Conway County</h2><p>View polling locations and coverage notes.</p></a><a class="card" href="/counties/van-buren/"><h2>Van Buren County</h2><p>View polling locations and coverage notes.</p></a>
-      </section>
-    </main>
-    
+  <section class="section">
+    <div class="container grid cols-3">
+      <a class="card stack" href="/counties/pulaski/">
+        <h2>Pulaski</h2>
+        <p>Little Rock + surrounding areas.</p>
+      </a>
+      <a class="card stack" href="/counties/faulkner/">
+        <h2>Faulkner</h2>
+        <p>Conway + central hubs.</p>
+      </a>
+      <a class="card stack" href="/counties/saline/">
+        <h2>Saline</h2>
+        <p>Benton, Bryant, and nearby towns.</p>
+      </a>
+
+      <a class="card stack" href="/counties/white/">
+        <h2>White</h2>
+        <p>Searcy + surrounding communities.</p>
+      </a>
+      <a class="card stack" href="/counties/cleburne/">
+        <h2>Cleburne</h2>
+        <p>Heber Springs + lakes region.</p>
+      </a>
+      <a class="card stack" href="/counties/perry/">
+        <h2>Perry</h2>
+        <p>Rural coverage and small towns.</p>
+      </a>
+
+      <a class="card stack" href="/counties/conway/">
+        <h2>Conway</h2>
+        <p>Morrilton and nearby communities.</p>
+      </a>
+      <a class="card stack" href="/counties/van-buren/">
+        <h2>Van Buren</h2>
+        <p>Clinton and northern coverage.</p>
+      </a>
+    </div>
+  </section>
+</main>
+
 <footer class="footer">
   <div class="container spread">
     <div>
@@ -54,6 +93,6 @@
   </div>
 </footer>
 
-    <script type="module" src="/assets/js/main.js"></script>
-  </body>
+<script type="module" src="/assets/js/main.js"></script>
+</body>
 </html>

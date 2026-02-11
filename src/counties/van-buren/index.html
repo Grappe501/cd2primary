@@ -1,16 +1,14 @@
+<!-- src/counties/van-buren/index.html -->
 <!doctype html>
 <html lang="en">
   <head>
-    
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="stylesheet" href="/assets/css/site.css" />
-<link rel="stylesheet" href="/assets/css/print.css" media="print" />
-
-    <title>Van Buren County • AR-02 #PrimaryVote! Scavenger Hunt</title>
+    <title>Van Buren County • AR-02 #PrimaryVote!</title>
   </head>
   <body>
-    
+
 <header class="nav">
   <div class="container nav-inner spread">
     <a class="brand" href="/">
@@ -27,41 +25,50 @@
   </div>
 </header>
 
-    <main class="container section">
-      <section class="hero" style="padding-top:1.5rem;">
-        <h1>Van Buren County</h1>
-        <p class="lede">
-          Polling locations for Van Buren County will appear below. This overlay provides stubs only; a later overlay will connect live data.
-        </p>
-        <div class="row" style="margin-top:1rem;">
-          <a class="btn" href="/counties/">Back to Counties</a>
-          <a class="btn primary" href="/app/">Join / Sign In</a>
-        </div>
-      </section>
+<main>
+  <section class="hero">
+    <div class="container stack">
+      <h1>Van Buren County</h1>
+      <p class="lede">
+        Clinton and surrounding areas. Polling-location checklist items outside major city limits are worth 4 points each.
+      </p>
+      <div class="badges">
+        <span class="badge"><strong>Base Points:</strong> 4 per checklist item (outside major city limits)</span>
+        <span class="badge"><strong>Sweep Eligible:</strong> Yes</span>
+      </div>
+    </div>
+  </section>
 
-      <section class="section" style="padding-top:0;">
-        <div class="card">
-          <h2>Polling Locations (Stub)</h2>
-          <p class="lede" style="margin-bottom:.75rem;">
-            This section will render location cards with address + map links once connected to the database.
-          </p>
-          <div class="grid" id="locations-grid">
-            <article class="card" style="box-shadow:none;">
-              <h2 style="margin:0 0 .5rem;">Example Location Name</h2>
-              <p style="margin:0; color: var(--muted);">123 Example St, Example City, AR 72XXX</p>
-              <div class="row" style="margin-top:.75rem;">
-                <a class="btn" href="#" onclick="return false;">Open in Maps (coming soon)</a>
-              </div>
-            </article>
-          </div>
-          <hr class="hr" />
-          <p style="margin:0; color: var(--muted);">
-            Data stub file: <code>/data/locations/van-buren.json</code>
-          </p>
-        </div>
-      </section>
-    </main>
-    
+  <section class="section">
+    <div class="container stack">
+      <div class="card stack">
+        <h2>Focus Areas</h2>
+        <ul>
+          <li>Clinton polling locations</li>
+          <li>Rural coverage and outreach</li>
+          <li>Early voting explanation (Feb 17 – Mar 3)</li>
+          <li>Primary + nonpartisan ballot clarity</li>
+        </ul>
+      </div>
+
+      <div class="card stack">
+        <h2>Submission Reminders</h2>
+        <ul>
+          <li>Include both required hashtags.</li>
+          <li>Clearly state address and nearby landmarks.</li>
+          <li>Submit through your Team Portal.</li>
+          <li>Claim only checklist items you actually included.</li>
+        </ul>
+      </div>
+
+      <div class="row">
+        <a class="btn primary" href="/app/">Submit a Video</a>
+        <a class="btn" href="/leaderboard/">View Leaderboard</a>
+      </div>
+    </div>
+  </section>
+</main>
+
 <footer class="footer">
   <div class="container spread">
     <div>
@@ -76,6 +83,6 @@
   </div>
 </footer>
 
-    <script type="module" src="/assets/js/main.js"></script>
-  </body>
+<script type="module" src="/assets/js/main.js"></script>
+</body>
 </html>

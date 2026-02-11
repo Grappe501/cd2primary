@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="/assets/css/site.css" />
+    <title>Join / Sign In • AR-02 #PrimaryVote! Scavenger Hunt</title>
+    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+  </head>
+  <body>
+
+    <header class="nav">
+      <div class="container nav-inner spread">
+        <a class="brand" href="/">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <span>AR-02 #PrimaryVote! Scavenger Hunt</span>
+        </a>
+        <nav class="nav-links" aria-label="Primary">
+          <a href="/rules/">Rules</a>
+          <a href="/handout/">Handout</a>
+          <a href="/counties/">Counties</a>
+          <a href="/leaderboard/">Leaderboard</a>
+          <a class="btn primary" href="/app/">Join / Sign In</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="section">
+        <div class="grid cols-2">
+          <div class="card">
+            <h1>Join / Sign In</h1>
+            <p class="lede">
+              Sign in to create your official Team Profile. All submissions and points tie back to your team.
+            </p>
+            <div class="row">
+              <button class="btn primary" id="btnOpen">Open Sign In</button>
+              <a class="btn" href="/rules/">Read the Rules</a>
+              <a class="btn" href="/leaderboard/">View Leaderboard</a>
+            </div>
+            <hr class="hr" />
+            <div id="status" class="badge" aria-live="polite">Checking login status…</div>
+            <div id="authedActions" hidden>
+              <p>
+                You’re signed in. Head to your profile to create or edit your Team.
+              </p>
+              <div class="row">
+                <a class="btn primary" href="/app/profile/">Go to Team Profile</a>
+                <button class="btn" id="btnLogout" type="button">Log out</button>
+              </div>
+            </div>
+          </div>
+
+          <aside class="card">
+            <h2>What you’ll do next</h2>
+            <ol>
+              <li>Create a Team Profile (teams of two)</li>
+              <li>Pick your home county</li>
+              <li>Link your TikTok handles</li>
+              <li>Start earning points (Submissions launch in Overlay 07)</li>
+            </ol>
+            <p class="lede">
+              If you don’t list it, you don’t get it. The system is built to keep scoring clean and enforceable.
+            </p>
+          </aside>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="container spread">
+        <div>
+          <div><strong>Chris Jones for Congress</strong></div>
+          <small>AR-02 #PrimaryVote! Scavenger Hunt • Feb 13 – Mar 3, 2026</small>
+        </div>
+        <div class="row">
+          <a href="/rules/">Rules</a>
+          <a href="/leaderboard/">Leaderboard</a>
+          <a href="/counties/">Counties</a>
+        </div>
+      </div>
+    </footer>
+
+    <script type="module">
+      import { initIdentity, currentUser, onAuthChange, logout } from "/assets/js/auth.js";
+
+      const statusEl = document.getElementById("status");
+      const actionsEl = document.getElementById("authedActions");
+      const btnOpen = document.getElementById("btnOpen");
+      const btnLogout = document.getElementById("btnLogout");
+
+      const identity = initIdentity();
+
+      function render() {
+        const user = currentUser();
+        if (user) {
+          statusEl.textContent = `Signed in as ${user.email}`;
+          statusEl.classList.add("success");
+          actionsEl.hidden = false;
+          btnOpen.textContent = "Manage Account";
+        } else {
+          statusEl.textContent = "You are not signed in yet.";
+          statusEl.classList.remove("success");
+          actionsEl.hidden = true;
+          btnOpen.textContent = "Open Sign In";
+        }
+      }
+
+      btnOpen.addEventListener("click", () => {
+        if (!identity) return;
+        identity.open();
+      });
+
+      btnLogout.addEventListener("click", () => logout({ redirectTo: "/" }));
+
+      onAuthChange(render);
+      render();
+    </script>
+  </body>
+</html>

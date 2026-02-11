@@ -155,3 +155,10 @@ Each overlay is atomic and deployable.
 - Bonus misfire prevention
 - Strict provisional vs official separation enforcement
 - Audit integrity reinforced
+
+---
+
+## Overlay 17 — Design System Completion + Routing Fix
+- Fixed Netlify rewrite ordering for `/app/profile/*`.
+- Added missing `.grid.cols-2` utility (plus `.grid.cols-4` for score layout).
+- Removed inline layout styles from `/app/`, `/app/profile/`, and `profile.js` to enforce consistent Design System styling.

@@ -1,4 +1,4 @@
-/*
+/* src/assets/css/tokens.css
   Design tokens (campaign-branded).
 
   Goals:
@@ -50,4 +50,10 @@
   --h1: clamp(2rem, 3.5vw, 3.2rem);
   --h2: clamp(1.25rem, 2vw, 1.85rem);
   --lede: 1.1rem;
+
+  /* Safety aliases for migration + drift prevention */
+  --brand: var(--primary);
+  --radius-md: var(--radius-sm);
+  --radius-lg: var(--radius);
+  --shadow-sm: 0 10px 30px rgba(20,40,74,.10);
 }

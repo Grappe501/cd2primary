@@ -1,36 +1,48 @@
+<!-- src/leaderboard/index.html -->
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Leaderboard • #PrimaryVote! CD2</title>
-  <link rel="stylesheet" href="/assets/css/styles.css" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Leaderboard • AR-02 #PrimaryVote!</title>
+<link rel="stylesheet" href="/assets/css/site.css" />
 </head>
-<body class="cj-page">
-  <header class="cj-header">
-    <div class="cj-container">
-      <a class="cj-brand" href="/">#PrimaryVote! CD2</a>
-      <nav class="cj-nav">
-        <a href="/rules/">Rules</a>
-        <a href="/counties/">Counties</a>
-        <a href="/leaderboard/" class="is-active">Leaderboard</a>
-        <a href="/app/">Team Portal</a>
-      </nav>
-    </div>
-  </header>
+<body>
 
-  <main class="cj-container cj-main">
-    <div class="cj-hero cj-hero--compact">
-      <h1 class="cj-h1">Leaderboard</h1>
-      <p class="cj-muted">Official score = approved submissions. Provisional score includes pending submissions.</p>
-      <p class="cj-muted" data-leaderboard-status></p>
-    </div>
+<header class="nav">
+  <div class="container nav-inner spread">
+    <a class="brand" href="/">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span>AR-02 #PrimaryVote! Scavenger Hunt</span>
+    </a>
+    <nav class="nav-links" aria-label="Primary">
+      <a href="/rules/">Rules</a>
+      <a href="/handout/">Handout</a>
+      <a href="/counties/">Counties</a>
+      <a href="/leaderboard/">Leaderboard</a>
+      <a class="btn primary" href="/app/">Join / Sign In</a>
+    </nav>
+  </div>
+</header>
 
-    <section class="cj-card">
-      <div class="cj-card__body">
-        <div class="cj-row cj-row--between cj-row--wrap cj-gap-2">
-          <input class="cj-input" type="search" placeholder="Search teams or counties…" data-leaderboard-search />
-          <select class="cj-select" data-leaderboard-sort>
+<main>
+  <section class="hero">
+    <div class="container stack">
+      <h1>Leaderboard</h1>
+      <p class="lede">
+        Official score = approved submissions. Provisional score includes pending submissions.
+      </p>
+      <p class="muted" data-leaderboard-status></p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container stack">
+      <div class="card stack">
+
+        <div class="row spread">
+          <input class="input" type="search" placeholder="Search teams or counties…" data-leaderboard-search />
+          <select class="select" data-leaderboard-sort>
             <option value="official_desc">Sort: Official (high → low)</option>
             <option value="provisional_desc">Sort: Provisional (high → low)</option>
             <option value="name_asc">Sort: Team name (A → Z)</option>
@@ -38,8 +50,8 @@
           </select>
         </div>
 
-        <div class="cj-table-wrap cj-mt-3">
-          <table class="cj-table">
+        <div class="table-wrap">
+          <table class="table">
             <thead>
               <tr>
                 <th>#</th>
@@ -52,24 +64,32 @@
               </tr>
             </thead>
             <tbody data-leaderboard-body>
-              <tr><td colspan="7" class="cj-muted">Loading…</td></tr>
+              <tr>
+                <td colspan="7" class="muted">Loading…</td>
+              </tr>
             </tbody>
           </table>
         </div>
+
       </div>
-    </section>
-  </main>
-
-  <footer class="cj-footer">
-    <div class="cj-container">
-      <p class="cj-muted">Campaign-sanctioned volunteer game. Keep it fair. Keep it fun.</p>
     </div>
-  </footer>
+  </section>
+</main>
 
-  <!-- Overlay 15: One-truth wiring
-       - No silent mock fallback
-       - Mock allowed ONLY via /leaderboard/?mock=1 (handled inside leaderboard.live.js)
-  -->
-  <script src="/assets/js/leaderboard.live.js"></script>
+<footer class="footer">
+  <div class="container spread">
+    <div>
+      <div><strong>Chris Jones for Congress</strong></div>
+      <small>AR-02 #PrimaryVote! Scavenger Hunt • Feb 13 – Mar 3, 2026</small>
+    </div>
+    <div class="row">
+      <a href="/rules/">Rules</a>
+      <a href="/leaderboard/">Leaderboard</a>
+      <a href="/counties/">Counties</a>
+    </div>
+  </div>
+</footer>
+
+<script src="/assets/js/leaderboard.live.js"></script>
 </body>
 </html>

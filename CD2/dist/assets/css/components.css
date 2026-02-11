@@ -1,4 +1,3 @@
-/* src/assets/css/components.css */
 /* Components */
 .nav{
   position: sticky;
@@ -45,6 +44,15 @@
   box-shadow: var(--shadow);
 }
 .card p{ color: var(--muted); }
+
+.card.compact{ padding: var(--space-3); }
+
+.stat-value{
+  font-size: 1.5rem;
+  line-height: 1.1;
+  font-weight: 800;
+  color: var(--text);
+}
 
 .btn{
   display:inline-flex;
@@ -133,104 +141,4 @@
     radial-gradient(1200px 500px at 15% 10%, rgba(230,160,75,.18), transparent 60%),
     radial-gradient(900px 450px at 85% 20%, rgba(31,58,102,.12), transparent 60%);
   border-bottom: 1px solid rgba(31,58,102,.10);
-}
-
-/* ---- DS primitives for Admin + Leaderboard ---- */
-
-.select{
-  width: 100%;
-  padding: .75rem .85rem;
-  border-radius: 14px;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  color: var(--text);
-}
-.select:focus{
-  outline: none;
-  border-color: rgba(31,58,102,.55);
-  box-shadow: 0 0 0 4px rgba(230,160,75,.18);
-}
-
-.table-wrap{
-  overflow-x:auto;
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
-  background: var(--surface);
-}
-
-.table{
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.table th,
-.table td{
-  padding: .9rem 1rem;
-  text-align: left;
-  border-bottom: 1px solid var(--border);
-  vertical-align: top;
-}
-
-.table th{
-  font-weight: 800;
-  font-size: .9rem;
-  letter-spacing: .02em;
-  color: var(--muted);
-  background: rgba(31,58,102,.04);
-}
-
-.table tr:hover{
-  background: rgba(31,58,102,.04);
-}
-
-.table .num{
-  text-align: right;
-  white-space: nowrap;
-}
-
-.btn.sm{
-  padding: .45rem .75rem;
-  font-size: .85rem;
-}
-
-.btn.ghost{
-  background: transparent;
-  border-color: transparent;
-}
-
-.btn.danger{
-  background: #dc2626;
-  border-color: #dc2626;
-  color: white;
-}
-.btn.danger:hover{
-  filter: brightness(.95);
-}
-
-.pill{
-  display:inline-flex;
-  padding:.3rem .65rem;
-  border-radius: 999px;
-  font-size:.75rem;
-  font-weight:800;
-  border:1px solid var(--border);
-  white-space: nowrap;
-}
-
-.pill.pending{
-  background: rgba(230,160,75,.18);
-  color: #7a4c00;
-  border-color: rgba(230,160,75,.35);
-}
-
-.pill.approved{
-  background: rgba(42,157,143,.18);
-  color: #0c4a43;
-  border-color: rgba(42,157,143,.35);
-}
-
-.pill.rejected{
-  background: rgba(220,38,38,.18);
-  color: #7f1d1d;
-  border-color: rgba(220,38,38,.35);
 }

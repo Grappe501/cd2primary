@@ -1,3 +1,4 @@
+/* src/assets/js/leaderboard.live.js */
 /* Overlay 15: Leaderboard One-Truth Wiring
  *
  * Goals:
@@ -39,13 +40,19 @@
   }
 
   function normalizeTeam(t) {
-    // This keeps us resilient to small naming differences in payloads.
     return {
       teamId: t.teamId ?? t.id ?? "",
       teamName: t.teamName ?? t.name ?? "Unnamed Team",
       homeCounty: t.homeCounty ?? t.county ?? "",
       officialPoints: num(t.officialPoints ?? t.totalPoints ?? t.points ?? 0),
-      provisionalPoints: num(t.provisionalPoints ?? t.provisional ?? t.pendingTotalPoints ?? t.officialPoints ?? t.totalPoints ?? 0),
+      provisionalPoints: num(
+        t.provisionalPoints ??
+          t.provisional ??
+          t.pendingTotalPoints ??
+          t.officialPoints ??
+          t.totalPoints ??
+          0
+      ),
       approvedCount: num(t.approvedCount ?? t.approved ?? 0),
       pendingCount: num(t.pendingCount ?? t.pending ?? 0),
     };
@@ -55,7 +62,7 @@
     if (!bodyEl) return;
 
     if (!Array.isArray(items) || items.length === 0) {
-      bodyEl.innerHTML = `<tr><td colspan="7" class="cj-muted">No teams yet.</td></tr>`;
+      bodyEl.innerHTML = `<tr><td colspan="7" class="muted">No teams yet.</td></tr>`;
       return;
     }
 
@@ -63,13 +70,13 @@
       .map((t, idx) => {
         return `
           <tr>
-            <td>${idx + 1}</td>
+            <td class="num">${idx + 1}</td>
             <td>${esc(t.teamName)}</td>
             <td>${esc(t.homeCounty)}</td>
-            <td>${fmtInt(t.officialPoints)}</td>
-            <td>${fmtInt(t.provisionalPoints)}</td>
-            <td>${fmtInt(t.approvedCount)}</td>
-            <td>${fmtInt(t.pendingCount)}</td>
+            <td class="num">${fmtInt(t.officialPoints)}</td>
+            <td class="num">${fmtInt(t.provisionalPoints)}</td>
+            <td class="num">${fmtInt(t.approvedCount)}</td>
+            <td class="num">${fmtInt(t.pendingCount)}</td>
           </tr>
         `;
       })
@@ -108,7 +115,9 @@
   }
 
   async function fetchLive() {
-    const res = await fetch(API_URL, { headers: { "accept": "application/json" } });
+    const res = await fetch(API_URL, {
+      headers: { accept: "application/json" },
+    });
     if (!res.ok) throw new Error(`Live fetch failed: ${res.status}`);
     const data = await res.json();
     const items = Array.isArray(data.items) ? data.items.map(normalizeTeam) : [];
@@ -116,13 +125,11 @@
   }
 
   async function fetchMockTeamsJson() {
-    // Optional explicit mock: /data/mock/teams.json (Overlay 04)
-    const res = await fetch("/data/mock/teams.json", { headers: { "accept": "application/json" } });
+    const res = await fetch("/data/mock/teams.json", {
+      headers: { accept: "application/json" },
+    });
     if (!res.ok) throw new Error(`Mock teams.json fetch failed: ${res.status}`);
     const data = await res.json();
-
-    // Overlay 04 mock likely isn't the same schema as live.
-    // We normalize as best as we can.
     const items = Array.isArray(data) ? data.map(normalizeTeam) : [];
     return { items };
   }
@@ -139,11 +146,12 @@
     } catch (err) {
       if (!allowMock) {
         setStatus("⚠️ Live scores unavailable. No mock data shown.");
-        if (bodyEl) bodyEl.innerHTML = `<tr><td colspan="7" class="cj-muted">Live scores unavailable.</td></tr>`;
+        if (bodyEl) {
+          bodyEl.innerHTML = `<tr><td colspan="7" class="muted">Live scores unavailable.</td></tr>`;
+        }
         return;
       }
 
-      // Explicit mock mode only
       setStatus("Mock mode • Not live data");
 
       try {
@@ -152,12 +160,13 @@
         return;
       } catch (mockErr) {
         setStatus("⚠️ Mock data unavailable.");
-        if (bodyEl) bodyEl.innerHTML = `<tr><td colspan="7" class="cj-muted">Mock data unavailable.</td></tr>`;
+        if (bodyEl) {
+          bodyEl.innerHTML = `<tr><td colspan="7" class="muted">Mock data unavailable.</td></tr>`;
+        }
         return;
       }
     }
 
-    // Live succeeded
     if (livePayload.generatedAt) {
       const d = new Date(livePayload.generatedAt);
       setStatus(`Live • Updated ${d.toLocaleString()}`);
@@ -169,12 +178,10 @@
   }
 
   function wireUI(allItems) {
-    // Initial render
     const sortKey = sortEl?.value || "official_desc";
     const q = searchEl?.value || "";
     renderRows(applyFilterAndSort(allItems, q, sortKey));
 
-    // Search listener
     if (searchEl) {
       searchEl.addEventListener("input", () => {
         const sortKeyNow = sortEl?.value || "official_desc";
@@ -182,7 +189,6 @@
       });
     }
 
-    // Sort listener
     if (sortEl) {
       sortEl.addEventListener("change", () => {
         const qNow = searchEl?.value || "";
@@ -192,8 +198,9 @@
   }
 
   init().catch(() => {
-    // last-resort: show explicit failure (no mock)
     setStatus("⚠️ Live scores unavailable. No mock data shown.");
-    if (bodyEl) bodyEl.innerHTML = `<tr><td colspan="7" class="cj-muted">Live scores unavailable.</td></tr>`;
+    if (bodyEl) {
+      bodyEl.innerHTML = `<tr><td colspan="7" class="muted">Live scores unavailable.</td></tr>`;
+    }
   });
 })();

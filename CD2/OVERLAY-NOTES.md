@@ -57,3 +57,17 @@ Verify:
 - Audit log records every status change
 - No bonus applied twice
 - No negative or NaN scores possible
+
+---
+
+## Overlay 17 — Design System Completion + Routing Fix
+
+Verify:
+- `/app/` loads normally (Join / Sign In)
+- `/app/profile/` loads profile UI (not redirected to `/app/index.html`)
+- No inline `style="..."` attributes remain in:
+  - `dist/app/index.html`
+  - `dist/app/profile/index.html`
+  - `dist/assets/js/profile.js`
+- `.grid.cols-2` renders a 2-column layout on desktop and stacks on mobile
+- Score box renders without inline styles and remains readable across breakpoints
