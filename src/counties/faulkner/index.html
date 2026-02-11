@@ -7,7 +7,7 @@
 <link rel="stylesheet" href="/assets/css/site.css" />
     <title>Faulkner County • AR-02 #PrimaryVote!</title>
   </head>
-  <body>
+  <body data-county-slug="faulkner">
 
 <header class="nav">
   <div class="container nav-inner spread">
@@ -61,6 +61,15 @@
         </ul>
       </div>
 
+      <div data-county-intel></div>
+
+      <div class="card stack">
+        <div data-county-sites data-election-date="2026-03-03"></div>
+        <p class="muted">
+          These locations are pulled from our county dataset. If a location looks wrong, tell your county clerk and report it to the campaign.
+        </p>
+      </div>
+
       <div class="row">
         <a class="btn primary" href="/app/">Submit a Video</a>
         <a class="btn" href="/leaderboard/">View Leaderboard</a>
@@ -84,5 +93,6 @@
 </footer>
 
 <script type="module" src="/assets/js/main.js"></script>
+<script type="module" src="/assets/js/county-page.js"></script>
 </body>
 </html>

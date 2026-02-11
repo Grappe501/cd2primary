@@ -6,6 +6,7 @@
     "build": "node scripts/build.mjs"
   },
   "dependencies": {
-    "@netlify/blobs": "latest"
+    "@netlify/blobs": "latest",
+    "@neondatabase/serverless": "^0.10.4"
   }
 }

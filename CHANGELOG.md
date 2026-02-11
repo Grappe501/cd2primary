@@ -178,3 +178,21 @@ Each overlay is atomic and deployable.
 - Added a “Your next steps” checklist on /app/profile/ that updates automatically
 - Added tooltip explanations to key Team Profile and Submission fields
 - Introduced small, DS-aligned onboarding utility classes (tip, callout, checklist, score grid)
+
+## Overlay 20 — County Intel DB Foundation + Pulaski Map Scaffold
+
+- Added Neon/Postgres-backed county intel foundation (VEP + registration + election results)
+- Added DB schema and seed examples under /db
+- Added public read-only endpoints for county summary and polling locations
+- Updated all county pages to render a non-overwhelming “County Snapshot” panel
+- Added Pulaski map scaffold (Leaflet) wired to DB locations endpoint
+- Added DS-aligned styles for intel panels and map scaffold
+
+---
+
+## Overlay 21 — Elections + Voting Sites + Faulkner Seed
+
+- Added county-scoped elections + voting-sites data model (supports special-day hours)
+- Added public read-only endpoint to fetch voting sites by county + election date
+- Added Faulkner County March 3, 2026 voting sites + hours seed (end-to-end live)
+- Added volunteer-friendly “Where to Vote” panel on Faulkner county page (Early Voting / Election Day tabs)
