@@ -71,3 +71,22 @@ Verify:
   - `dist/assets/js/profile.js`
 - `.grid.cols-2` renders a 2-column layout on desktop and stacks on mobile
 - Score box renders without inline styles and remains readable across breakpoints
+
+---
+
+## Overlay 18 — Launch Polish
+
+Verify:
+- `/assets/favicon.svg` returns 200
+- Key pages include meta description + favicon
+- Missing routes serve a styled 404 page
+
+What changed:
+- Added a lightweight favicon (`/assets/favicon.svg`).
+- Added basic SEO meta tags (description + theme color) to key pages.
+- Added `404.html` with standard site layout.
+
+Out of scope (kept):
+- No scoring changes
+- No schema/storage changes
+- No new features or admin tooling

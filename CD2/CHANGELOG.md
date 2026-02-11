@@ -161,4 +161,11 @@ Each overlay is atomic and deployable.
 ## Overlay 17 — Design System Completion + Routing Fix
 - Fixed Netlify rewrite ordering for `/app/profile/*`.
 - Added missing `.grid.cols-2` utility (plus `.grid.cols-4` for score layout).
-- Removed inline layout styles from `/app/`, `/app/profile/`, and `profile.js` to enforce consistent Design System styling.
+- Removed inline layout styles from `/app/`, `/app/profile/`, and the profile script to enforce consistent Design System styling.
+
+---
+
+## Overlay 18 — Launch Polish
+- Added site meta description + theme-color + favicon across key pages (Home, Rules, Leaderboard, Team Portal, Profile).
+- Added a styled 404 page (`dist/404.html`).
+- Added SVG favicon at `/assets/favicon.svg`.
