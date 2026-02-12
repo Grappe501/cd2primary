@@ -13,7 +13,8 @@ export default async (req) => {
   const electionDate = String(url.searchParams.get("election") || "").trim();
 
   if (!county) return json(400, { error: "Missing 'county' query param" });
-  if (!electionDate) return json(400, { error: "Missing 'election' query param (YYYY-MM-DD)" });
+  if (!electionDate)
+    return json(400, { error: "Missing 'election' query param (YYYY-MM-DD)" });
 
   if (!hasDatabaseUrl()) {
     return badConfigResponse(json);
@@ -22,10 +23,13 @@ export default async (req) => {
   try {
     const sql = getSql();
 
+    // IMPORTANT:
+    // counties.id is UUID, but elections.county_id is treated as a TEXT slug (e.g. "faulkner").
+    // So we join slug-to-slug, not uuid-to-text.
     const electionRows = await sql`
       SELECT e.id, e.election_date, e.name, e.election_type, e.notes
       FROM elections e
-      JOIN counties c ON c.id = e.county_id
+      JOIN counties c ON c.slug = e.county_id
       WHERE c.slug = ${county} AND e.election_date = ${electionDate}::date
       ORDER BY e.id DESC
       LIMIT 1
@@ -64,7 +68,7 @@ export default async (req) => {
 
     const byKind = { early: new Map(), election_day: new Map() };
 
-    for (const r of (rows || [])) {
+    for (const r of rows || []) {
       const kind = r.kind === "election_day" ? "election_day" : "early";
       const map = byKind[kind];
       const key = String(r.id);
