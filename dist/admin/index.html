@@ -1,11 +1,14 @@
-<!-- src/admin/index.html -->
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Admin review queue for the AR-02 #PrimaryVote! Scavenger Hunt." />
+  <meta name="theme-color" content="#0b1220" />
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
   <title>Admin • Review + Approve</title>
   <link rel="stylesheet" href="/assets/css/site.css" />
+  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
 </head>
 <body>
   <header class="nav">
@@ -35,6 +38,13 @@
           <button class="btn ghost sm" data-refresh>Refresh</button>
         </div>
 
+        <div class="row" style="flex-wrap:wrap;">
+          <span class="badge" data-count="pending">Pending: —</span>
+          <span class="badge" data-count="approved">Approved: —</span>
+          <span class="badge" data-count="rejected">Rejected: —</span>
+          <span class="badge" data-count="all">All: —</span>
+        </div>
+
         <p class="muted" data-admin-status></p>
       </div>
     </section>
@@ -49,7 +59,7 @@
               <option value="rejected">Rejected</option>
               <option value="all">All</option>
             </select>
-            <input class="input" type="search" placeholder="Search team, county, platform…" data-search />
+            <input class="input" type="search" placeholder="Search team, county, type, platform, link, notes…" data-search />
           </div>
 
           <div class="table-wrap">
@@ -70,6 +80,10 @@
               </tbody>
             </table>
           </div>
+
+          <div class="help" style="margin-top:.5rem;">
+            Tip: click <strong>Links</strong> to open all platform posts for a submission. Reject requires a reason (stored in audit when supported).
+          </div>
         </div>
 
         <div class="card stack" data-audit-panel hidden>
@@ -79,6 +93,31 @@
           </div>
           <div data-audit-body></div>
         </div>
+
+        <div class="card stack" data-note-panel hidden>
+          <div class="spread">
+            <h2 data-note-title>Action Note</h2>
+            <button class="btn ghost sm" data-note-close>Close</button>
+          </div>
+
+          <div class="help" data-note-help></div>
+
+          <form data-note-form>
+            <input type="hidden" name="teamId" />
+            <input type="hidden" name="submissionId" />
+            <input type="hidden" name="status" />
+
+            <label class="label" for="noteText">Note</label>
+            <textarea class="input" id="noteText" name="note" rows="4" placeholder="Type the reason / note here…"></textarea>
+            <div class="help" data-note-error></div>
+
+            <div class="row">
+              <button class="btn primary" type="submit" data-note-submit>Confirm</button>
+              <button class="btn" type="button" data-note-cancel>Cancel</button>
+            </div>
+          </form>
+        </div>
+
       </div>
     </section>
   </main>
@@ -97,7 +136,6 @@
     </div>
   </footer>
 
-  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
   <script src="/assets/js/auth.js"></script>
   <script src="/assets/js/admin.js"></script>
 </body>
