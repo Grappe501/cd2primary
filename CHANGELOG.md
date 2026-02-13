@@ -178,3 +178,14 @@ Each overlay is atomic and deployable.
 - Explicit schema-qualified queries (`public.*`)
 - Removed slug/id mismatch risk permanently
 - Verified Neon branch alignment
+
+---
+
+## Overlay 24B — Submission Validation + UX Guardrails
+- Client-side submit validation added (blocks bad submissions before save):
+  - Requires at least one platform link
+  - Validates platform link domains (TikTok/IG/Facebook/X/Bluesky)
+  - Polling-location submissions require polling county + at least one claimed checklist item
+  - Requires hashtag confirmation checkbox
+- Added expected-points hint based on cross-post link count
+- Added submission error debug token to speed support

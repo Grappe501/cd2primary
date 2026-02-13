@@ -90,10 +90,6 @@ Out of scope (kept):
 - No scoring changes
 - No schema/storage changes
 - No new features or admin tooling
-# OVERLAY-NOTES.md
-
-Operational verification notes for each overlay.
-After applying an overlay, confirm all checklist items before committing.
 
 ---
 
@@ -109,3 +105,18 @@ Verify:
 - Endpoint returns:
   - `found: false` when no matching election
   - `found: true` when seeded properly
+
+---
+
+## Overlay 24B — Submission Validation + UX Guardrails
+
+Verify:
+- Submission form blocks submit unless at least one platform link is provided
+- If a link is provided, it must match the correct platform domain
+- Polling-location submissions require:
+  - polling county
+  - at least one claimed checklist item
+- Hashtag confirmation checkbox is enforced
+- Expected-points hint updates as cross-post links are added/removed
+- Validation errors display inline (err_* fields)
+- No console errors in normal operation
