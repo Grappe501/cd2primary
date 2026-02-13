@@ -2,3 +2,97 @@
 @import url("/assets/css/base.css");
 @import url("/assets/css/layout.css");
 @import url("/assets/css/components.css");
+
+/* ------------------------------------------------------------
+   Overlay 27: Small UI consistency overrides
+   Goal: standardize pills/badges + status tables + mobile wrapping
+   This file should stay light. The design system lives in the imports.
+------------------------------------------------------------ */
+
+/* Generic helpers (safe fallbacks if not defined elsewhere) */
+.muted {
+  opacity: 0.78;
+}
+
+/* Status pills (admin/status pages) */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  line-height: 1.1;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.pill.approved {
+  border-color: rgba(46, 211, 138, 0.35);
+  background: rgba(46, 211, 138, 0.12);
+}
+
+.pill.rejected {
+  border-color: rgba(255, 92, 92, 0.35);
+  background: rgba(255, 92, 92, 0.12);
+}
+
+.pill.pending {
+  border-color: rgba(255, 210, 85, 0.35);
+  background: rgba(255, 210, 85, 0.12);
+}
+
+/* Endpoint/code readability (status page table) */
+code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
+  font-size: 0.92em;
+}
+
+.table-wrap code {
+  display: inline-block;
+  padding: 0.12rem 0.3rem;
+  border-radius: 0.4rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* Score grid in team profile: keep tight and readable on mobile */
+.score-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.card.stat .value {
+  font-size: 1.35rem;
+  line-height: 1.2;
+}
+
+@media (max-width: 860px) {
+  .score-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Admin action rows: reduce “button overflow” on narrow screens */
+.table .row {
+  flex-wrap: wrap;
+}
+
+.table .btn.sm {
+  padding: 0.35rem 0.6rem;
+}
+
+/* Status page table: allow long endpoint strings to wrap */
+.table td {
+  word-break: break-word;
+}
+
+/* Make badges behave well when used as “Ref:” tokens */
+.badge {
+  max-width: 100%;
+  word-break: break-word;
+}
