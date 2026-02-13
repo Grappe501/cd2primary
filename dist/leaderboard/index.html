@@ -1,15 +1,14 @@
-<!-- src/leaderboard/index.html -->
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description" content="Live leaderboard for the AR-02 #PrimaryVote! Scavenger Hunt. Official scores include approved submissions only." />
   <meta name="theme-color" content="#0b1220" />
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
 
-<title>Leaderboard • AR-02 #PrimaryVote!</title>
-<link rel="stylesheet" href="/assets/css/site.css" />
+  <title>Leaderboard • AR-02 #PrimaryVote!</title>
+  <link rel="stylesheet" href="/assets/css/site.css" />
 </head>
 <body>
 
@@ -36,7 +35,20 @@
       <p class="lede">
         Official score = approved submissions. Provisional score includes pending submissions.
       </p>
-      <p class="muted" data-leaderboard-status></p>
+
+      <div class="row" style="flex-wrap:wrap;">
+        <p class="muted" data-leaderboard-status style="margin:0;"></p>
+        <span class="badge" data-leaderboard-debug hidden></span>
+      </div>
+
+      <div class="row" style="flex-wrap:wrap; margin-top:.5rem;">
+        <button class="btn ghost sm" type="button" data-leaderboard-retry>Retry</button>
+        <a class="btn ghost sm" href="/status/">Status</a>
+      </div>
+
+      <noscript>
+        <p class="muted">JavaScript is required to load live scores.</p>
+      </noscript>
     </div>
   </section>
 
@@ -75,6 +87,10 @@
           </table>
         </div>
 
+        <div class="help">
+          If live scores are down, we will not show fake scores. Use the <a href="/status/">Status</a> page to verify services.
+        </div>
+
       </div>
     </div>
   </section>
@@ -90,6 +106,7 @@
       <a href="/rules/">Rules</a>
       <a href="/leaderboard/">Leaderboard</a>
       <a href="/counties/">Counties</a>
+      <a href="/status/">Status</a>
     </div>
   </div>
 </footer>

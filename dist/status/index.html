@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Service status checks for AR-02 #PrimaryVote! Scavenger Hunt." />
+  <meta name="theme-color" content="#0b1220" />
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+  <title>Status • AR-02 #PrimaryVote!</title>
+  <link rel="stylesheet" href="/assets/css/site.css" />
+</head>
+<body>
+
+<header class="nav">
+  <div class="container nav-inner spread">
+    <a class="brand" href="/">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span>AR-02 #PrimaryVote! Scavenger Hunt</span>
+    </a>
+    <nav class="nav-links" aria-label="Primary">
+      <a href="/rules/">Rules</a>
+      <a href="/counties/">Counties</a>
+      <a href="/leaderboard/">Leaderboard</a>
+      <a class="btn primary" href="/app/">Join / Sign In</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="container stack">
+      <h1>Status</h1>
+      <p class="lede">This page checks the live functions your site depends on.</p>
+      <p class="muted" id="statusNote"></p>
+
+      <div class="row" style="flex-wrap:wrap;">
+        <button class="btn ghost sm" type="button" id="btnRun">Run checks</button>
+        <a class="btn ghost sm" href="/leaderboard/">Back to Leaderboard</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container stack">
+      <div class="card stack">
+        <h2>Checks</h2>
+        <div class="table-wrap">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Service</th>
+                <th>Endpoint</th>
+                <th>Status</th>
+                <th>Detail</th>
+              </tr>
+            </thead>
+            <tbody id="rows">
+              <tr><td colspan="4" class="muted">Click “Run checks”.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="help">
+          If something fails, copy the “Ref” code from the detail and share it with the site admin.
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="container spread">
+    <div>
+      <div><strong>Chris Jones for Congress</strong></div>
+      <small>AR-02 #PrimaryVote! Scavenger Hunt • Feb 13 – Mar 3, 2026</small>
+    </div>
+    <div class="row">
+      <a href="/rules/">Rules</a>
+      <a href="/leaderboard/">Leaderboard</a>
+      <a href="/counties/">Counties</a>
+      <a href="/status/">Status</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const checks = [
+    { name: "Health", url: "/.netlify/functions/health" },
+    { name: "Leaderboard (live)", url: "/.netlify/functions/leaderboard-get" },
+    { name: "Public county summary", url: "/.netlify/functions/public-county-summary?county=faulkner" },
+    { name: "Public county sites (Faulkner)", url: "/.netlify/functions/public-county-sites?county=faulkner&election=2026-03-03" },
+  ];
+
+  const rows = document.getElementById("rows");
+  const note = document.getElementById("statusNote");
+  const btn = document.getElementById("btnRun");
+
+  function refToken() {
+    const d = new Date();
+    const pad = (n) => String(n).padStart(2, "0");
+    return `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`;
+  }
+
+  function esc(s) {
+    return String(s ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  async function runOne(c) {
+    const ref = refToken();
+    try {
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), 8000);
+
+      const res = await fetch(c.url, { headers: { accept: "application/json" }, signal: ctrl.signal });
+      clearTimeout(t);
+
+      const text = await res.text();
+      const ok = res.ok;
+
+      return {
+        ok,
+        code: res.status,
+        detail: ok ? "OK" : `HTTP ${res.status} • Ref: ${ref}`,
+        sample: text.slice(0, 180),
+      };
+    } catch (e) {
+      return { ok: false, code: "ERR", detail: `Failed • Ref: ${ref}`, sample: String(e?.message || e) };
+    }
+  }
+
+  function render(results) {
+    rows.innerHTML = results.map((r) => {
+      const pill = r.ok ? "approved" : "rejected";
+      const label = r.ok ? "OK" : "FAIL";
+      return `
+        <tr>
+          <td><strong>${esc(r.name)}</strong></td>
+          <td><code>${esc(r.url)}</code></td>
+          <td><span class="pill ${pill}">${label}</span></td>
+          <td>
+            <div>${esc(r.detail)}</div>
+            <div class="muted">${esc(r.sample)}</div>
+          </td>
+        </tr>
+      `;
+    }).join("");
+  }
+
+  async function runAll() {
+    if (note) note.textContent = "Running checks…";
+    rows.innerHTML = `<tr><td colspan="4" class="muted">Running…</td></tr>`;
+
+    const out = [];
+    for (const c of checks) {
+      const res = await runOne(c);
+      out.push({ ...c, ...res });
+    }
+
+    render(out);
+
+    const fails = out.filter((x) => !x.ok).length;
+    if (note) note.textContent = fails ? `Some checks failed (${fails}).` : "All checks passed.";
+  }
+
+  btn?.addEventListener("click", runAll);
+</script>
+
+</body>
+</html>
