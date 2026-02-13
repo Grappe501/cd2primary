@@ -89,7 +89,10 @@ WHERE vs.county_id = (SELECT county_id FROM c)
     'Mayflower Water Dept.',
     'McGee Sports Center',
     'Vilonia First Baptist Church'
-  );
+  )
+ON CONFLICT (voting_site_id, election_id, kind, start_ts, end_ts)
+DO NOTHING;
+
 
 -- Early voting: Mon Mar 2 special hours
 INSERT INTO voting_site_windows (voting_site_id, election_id, kind, start_ts, end_ts, notes)
@@ -106,7 +109,10 @@ WHERE vs.county_id = (SELECT county_id FROM c)
     'Mayflower Water Dept.',
     'McGee Sports Center',
     'Vilonia First Baptist Church'
-  );
+  )
+ON CONFLICT (voting_site_id, election_id, kind, start_ts, end_ts)
+DO NOTHING;
+
 
 -- Early voting: Sat Feb 21 Courthouse only
 INSERT INTO voting_site_windows (voting_site_id, election_id, kind, start_ts, end_ts, notes)
@@ -116,7 +122,10 @@ SELECT vs.id, (SELECT election_id FROM e), 'early',
   'Saturday Feb 21, 2026: 8:00 a.m. – 6:00 p.m. (Courthouse only)'
 FROM voting_sites vs
 WHERE vs.county_id = (SELECT county_id FROM c)
-  AND vs.name = 'Faulkner County Courthouse';
+  AND vs.name = 'Faulkner County Courthouse'
+ON CONFLICT (voting_site_id, election_id, kind, start_ts, end_ts)
+DO NOTHING;
+
 
 -- Early voting: Sat Feb 28 Courthouse only
 INSERT INTO voting_site_windows (voting_site_id, election_id, kind, start_ts, end_ts, notes)
@@ -126,7 +135,10 @@ SELECT vs.id, (SELECT election_id FROM e), 'early',
   'Saturday Feb 28, 2026: 8:00 a.m. – 6:00 p.m. (Courthouse only)'
 FROM voting_sites vs
 WHERE vs.county_id = (SELECT county_id FROM c)
-  AND vs.name = 'Faulkner County Courthouse';
+  AND vs.name = 'Faulkner County Courthouse'
+ON CONFLICT (voting_site_id, election_id, kind, start_ts, end_ts)
+DO NOTHING;
+
 
 -- Early voting: Wed/Thu special center (Conway Regional)
 INSERT INTO voting_site_windows (voting_site_id, election_id, kind, start_ts, end_ts, notes)
@@ -136,7 +148,10 @@ SELECT vs.id, (SELECT election_id FROM e), 'early',
   'Wednesday Feb 25, 2026: 8:00 a.m. – 6:00 p.m. (Conway Regional only)'
 FROM voting_sites vs
 WHERE vs.county_id = (SELECT county_id FROM c)
-  AND vs.name = 'Conway Regional Medical Center';
+  AND vs.name = 'Conway Regional Medical Center'
+ON CONFLICT (voting_site_id, election_id, kind, start_ts, end_ts)
+DO NOTHING;
+
 
 INSERT INTO voting_site_windows (voting_site_id, election_id, kind, start_ts, end_ts, notes)
 SELECT vs.id, (SELECT election_id FROM e), 'early',
@@ -145,14 +160,20 @@ SELECT vs.id, (SELECT election_id FROM e), 'early',
   'Thursday Feb 26, 2026: 8:00 a.m. – 6:00 p.m. (Conway Regional only)'
 FROM voting_sites vs
 WHERE vs.county_id = (SELECT county_id FROM c)
-  AND vs.name = 'Conway Regional Medical Center';
+  AND vs.name = 'Conway Regional Medical Center'
+ON CONFLICT (voting_site_id, election_id, kind, start_ts, end_ts)
+DO NOTHING;
+
 
 -- Election Day: all vote centers (including the library and other shared sites)
 INSERT INTO voting_site_windows (voting_site_id, election_id, kind, start_ts, end_ts, notes)
 SELECT vs.id, (SELECT election_id FROM e), 'election_day',
   TIMESTAMPTZ '2026-03-03 07:00:00-06',
   TIMESTAMPTZ '2026-03-03 19:30:00-06',
-  'Election Day March 3, 2026: 7:30 a.m. – 7:30 p.m. (Vote centers open 7:00 a.m.; line at 7:30 p.m. votes)'
+  'Election Day March 3, 2026: 7:30 a.m. – 7:30 p.m. (Vote centers open 7:00 a.m.
+ON CONFLICT (voting_site_id, election_id, kind, start_ts, end_ts)
+DO NOTHING;
+ line at 7:30 p.m. votes)'
 FROM voting_sites vs
 WHERE vs.county_id = (SELECT county_id FROM c)
   AND vs.name IN (

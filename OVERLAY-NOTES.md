@@ -120,3 +120,19 @@ Verify:
 - Expected-points hint updates as cross-post links are added/removed
 - Validation errors display inline (err_* fields)
 - No console errors in normal operation
+
+---
+
+## Overlay 37 — Launch Checklist + Monitoring Playbook
+
+### Purpose
+Formalize go-live validation and post-launch operational governance.
+
+### Deliverables
+- LAUNCH_CHECKLIST.md (deterministic pre-launch validation)
+- POST_LAUNCH_MONITORING.md (operational response guide)
+
+### Acceptance Criteria
+- Launch can be executed without ambiguity.
+- Monitoring expectations are documented.
+- Overlay discipline preserved post-launch.

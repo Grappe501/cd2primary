@@ -189,3 +189,13 @@ Each overlay is atomic and deployable.
   - Requires hashtag confirmation checkbox
 - Added expected-points hint based on cross-post link count
 - Added submission error debug token to speed support
+
+---
+
+## Overlay 37 — Launch Checklist + Monitoring Playbook
+Date: 2026-02-13
+
+- Added LAUNCH_CHECKLIST.md
+- Added POST_LAUNCH_MONITORING.md
+- Formalized production go-live contract
+- Defined operational monitoring and rollback procedures

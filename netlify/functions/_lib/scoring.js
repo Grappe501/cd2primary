@@ -1,9 +1,13 @@
 /**
  * Scoring Engine (Overlay 09)
  * Points are awarded only for what the team submits/claims.
+ *
+ * Overlay 30: Deterministic scoring unification
+ * - Centralize caps + per-team scoring computation here
+ * - Ensure leaderboard + score-get compute totals identically
  */
 
-export const SCORING_VERSION = 2;
+export const SCORING_VERSION = 3;
 
 export const PLATFORM_KEYS = [
   "tiktok",
@@ -12,6 +16,11 @@ export const PLATFORM_KEYS = [
   "x",
   "bluesky"
 ];
+
+// Centralized caps (applies to BOTH provisional + official scoring)
+export const SCORING_CAPS = {
+  support_chris: 2
+};
 
 export function countPlatforms(platformLinks = {}) {
   let n = 0;
@@ -39,7 +48,7 @@ export function calcBasePoints(sub) {
 
   switch (type) {
     case "support_chris":
-      // 25 points each (cap handled later in admin review).
+      // 25 points each (cap enforced centrally via SCORING_CAPS)
       return 25;
 
     case "volunteer_event":
@@ -141,4 +150,106 @@ export function calcPostingStreakBonus(approvedSubs = []) {
   if (best >= 5) return 25;
   if (best >= 3) return 10;
   return 0;
+}
+
+function stableSortSubs(subs = []) {
+  // Deterministic order across endpoints to ensure caps behave identically everywhere.
+  // Primary: createdAt (ISO string). Secondary: submissionId.
+  return [...subs].sort((a, b) => {
+    const ac = a?.createdAt || "";
+    const bc = b?.createdAt || "";
+    if (ac < bc) return -1;
+    if (ac > bc) return 1;
+    const aid = a?.submissionId || "";
+    const bid = b?.submissionId || "";
+    if (aid < bid) return -1;
+    if (aid > bid) return 1;
+    return 0;
+  });
+}
+
+function applyCap(type, countedByType) {
+  const cap = SCORING_CAPS?.[type];
+  if (!(typeof cap === "number" && cap > 0)) return { capBlocked: false };
+  const already = countedByType[type] || 0;
+  if (already >= cap) return { capBlocked: true };
+  countedByType[type] = already + 1;
+  return { capBlocked: false };
+}
+
+/**
+ * Deterministic per-team scoring from raw submission objects.
+ * - Computes provisional + official points with centralized caps.
+ * - Computes official-only bonuses.
+ * - Optionally returns a per-submission summary with capBlocked + points.
+ */
+export function computeTeamScore(submissions = [], opts = {}) {
+  const includeSummaries = opts?.includeSummaries !== false;
+
+  let official = 0;
+  let provisional = 0;
+
+  let approvedCount = 0;
+  let pendingCount = 0;
+
+  const approvedSubs = [];
+  const countedByType = Object.create(null);
+
+  const subsSorted = stableSortSubs(Array.isArray(submissions) ? submissions : []);
+  const summaries = [];
+
+  for (const sub of subsSorted) {
+    if (!sub) continue;
+
+    const computed = calcCalculatedPoints(sub);
+    let points = Number(computed.calculatedPoints || 0) || 0;
+
+    const type = sub.submissionType || "";
+    const { capBlocked } = applyCap(type, countedByType);
+    if (capBlocked) points = 0;
+
+    const status = sub.status || "pending";
+
+    // Provisional includes pending + approved
+    if (status === "approved") {
+      approvedCount += 1;
+      approvedSubs.push(sub);
+      official += points;
+      provisional += points;
+    } else if (status === "pending") {
+      pendingCount += 1;
+      provisional += points;
+    } else {
+      // rejected: neither official nor provisional (consistent with existing leaderboard behavior)
+    }
+
+    if (includeSummaries) {
+      summaries.push({
+        submissionId: sub.submissionId,
+        submissionType: sub.submissionType,
+        status,
+        createdAt: sub.createdAt,
+        submissionDate: sub.submissionDate,
+        points,
+        capBlocked: !!capBlocked
+      });
+    }
+  }
+
+  const sweepBonus = calcEightCountySweepBonus(approvedSubs);
+  const streakBonus = calcPostingStreakBonus(approvedSubs);
+
+  official += (Number(sweepBonus) || 0) + (Number(streakBonus) || 0);
+
+  return {
+    scoringVersion: SCORING_VERSION,
+    officialPoints: official,
+    provisionalPoints: provisional,
+    eightCountySweepBonus: sweepBonus,
+    postingStreakBonus: streakBonus,
+    approvedCount,
+    pendingCount,
+    submissionCount: includeSummaries ? summaries.length : subsSorted.length,
+    submissions: includeSummaries ? summaries : undefined
+  };
 }

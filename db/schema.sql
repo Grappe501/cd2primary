@@ -123,3 +123,7 @@ CREATE TABLE IF NOT EXISTS voting_site_windows (
 
 CREATE INDEX IF NOT EXISTS voting_site_windows_election_kind_idx
   ON voting_site_windows(election_id, kind);
+
+CREATE UNIQUE INDEX IF NOT EXISTS voting_site_windows_unique_window_idx
+  ON voting_site_windows(voting_site_id, election_id, kind, start_ts, end_ts);
+

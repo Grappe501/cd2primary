@@ -105,3 +105,24 @@ Make admin actions safe and fully traceable.
 - Updates `CHANGELOG.md`
 - Only includes files touched by that overlay
 - Must deploy clean on Netlify
+
+---
+
+# Overlay 35 — Stabilization Doc Reconciliation
+Last updated: 2026-02-13
+
+This stabilization plan must be interpreted to include the post-stabilization hardening that now exists in-repo
+(Overlays 19/20/21/26/27) and the completion overlays (28–35).
+
+## Stabilization Must Cover (Non-Negotiable)
+- No silent failures in portals; all network/DB errors surfaced to the user.
+- Status page is authoritative for diagnosing outages.
+- Auth gates enforced for `/app/*` and `/admin/*`.
+- Admin actions are auditable (append-only audit trail) and reviewable in UI.
+- Deterministic scoring: one canonical scoring path used by every surface.
+
+## Completion Overlay Dependencies
+- Overlay 29 audit indexing and schema alignment is required to satisfy the auditability requirement.
+- Overlay 30 scoring unification is required to satisfy determinism requirement.
+- Overlay 31 standard envelopes reduce drift and simplify operational debugging.
+

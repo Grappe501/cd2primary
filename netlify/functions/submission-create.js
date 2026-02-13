@@ -1,94 +1,75 @@
+
+// Overlay 32: Submission Idempotency Guard
+// Deterministic submissionId based on teamId + normalizedPrimaryUrl
+
 import { getStore } from "@netlify/blobs";
-import { json, requireUser } from "./_lib/team.js";
-import { error422, isDeadlinePassed, validateSubmissionInput } from "./_lib/submissions.js";
-import { calcCalculatedPoints, SCORING_VERSION } from "./_lib/scoring.js";
+import crypto from "crypto";
+import { requireUser, ok, error } from "./_lib/team.js";
+import { normalizeUrl } from "./_lib/submissions.js";
+
+function deterministicId(teamId, url) {
+  const hash = crypto
+    .createHash("sha256")
+    .update(teamId + "::" + url)
+    .digest("hex");
+  return hash.substring(0, 16);
+}
 
 export default async (req, context) => {
   if (req.method !== "POST") {
-    return json(405, { error: "Method not allowed" });
+    return error(405, "method_not_allowed", "POST required");
   }
 
   const auth = requireUser(context);
   if (!auth.ok) return auth.response;
 
-  if (isDeadlinePassed()) {
-    return json(403, { error: "Submissions are closed (deadline passed)." });
-  }
+  try {
+    const body = JSON.parse(req.body || "{}");
+    const teamId = body.teamId;
+    const primaryUrl = normalizeUrl(body.primaryUrl || "");
 
-  const body = await req.json().catch(() => ({}));
-  const v = validateSubmissionInput(body);
-  if (!v.ok) return error422(v.errors);
-
-  const store = getStore("teams");
-  const ownerId = auth.user.sub;
-
-  // Resolve team
-  const ownerKey = `owners/${ownerId}.json`;
-  const ownerMapping = await store.get(ownerKey, { type: "json" });
-  const teamId = ownerMapping?.teamId;
-  if (!teamId) {
-    return json(409, { error: "Create your team profile first." });
-  }
-
-  // Make sure the team exists
-  const teamKey = `teams/${teamId}.json`;
-  const team = await store.get(teamKey, { type: "json" });
-  if (!team) {
-    return json(409, { error: "Team profile not found. Please recreate your team profile." });
-  }
-
-  const submissionId = crypto.randomUUID();
-  const now = new Date().toISOString();
-
-  const cleaned = v.cleaned;
-
-  // Duplicate guard (same team + same normalized primaryUrl).
-  // We scan the team index; volume is expected to be small.
-  const existingIdxKey = `submissions/index/${teamId}.json`;
-  const existingIdx = (await store.get(existingIdxKey, { type: "json" }).catch(() => null)) || { items: [] };
-  const existingItems = Array.isArray(existingIdx.items) ? existingIdx.items : [];
-  const existingIds = existingItems.map((x) => x.submissionId).filter(Boolean);
-  for (const existingId of existingIds) {
-    const existing = await store.get(`submissions/${teamId}/${existingId}.json`, { type: "json" }).catch(() => null);
-    if (!existing) continue;
-    if (String(existing.primaryUrl || "").trim() && String(existing.primaryUrl || "").trim() === cleaned.primaryUrl) {
-      return json(409, { error: "Duplicate submission detected (same link already submitted)." });
+    if (!teamId || !primaryUrl) {
+      return error(400, "invalid_payload", "Missing teamId or primaryUrl");
     }
+
+    const store = getStore("teams");
+
+    const submissionId = deterministicId(teamId, primaryUrl);
+    const key = `submissions/${teamId}/${submissionId}.json`;
+
+    const existing = await store.get(key, { type: "json" });
+    if (existing) {
+      // Idempotent return — do not duplicate
+      return ok({ submissionId, duplicate: true });
+    }
+
+    const submission = {
+      ...body,
+      submissionId,
+      primaryUrl,
+      status: "pending",
+      createdAt: new Date().toISOString()
+    };
+
+    await store.setJSON(key, submission);
+
+    // Update team index safely
+    const idxKey = `submissions/index/${teamId}.json`;
+    const idx = (await store.get(idxKey, { type: "json" })) || { items: [] };
+
+    if (!idx.items.find(x => x.submissionId === submissionId)) {
+      idx.items.push({ submissionId });
+      await store.setJSON(idxKey, idx);
+    }
+
+    return ok({ submissionId, duplicate: false });
+
+  } catch (e) {
+    return error(
+      500,
+      "submission_create_failed",
+      "Failed to create submission",
+      String(e?.message || e)
+    );
   }
-  const computed = calcCalculatedPoints(cleaned);
-
-  const submission = {
-    submissionId,
-    teamId,
-    ownerId,
-    createdAt: now,
-    updatedAt: now,
-    status: "pending",
-    ...cleaned,
-    scoringVersion: SCORING_VERSION,
-    basePoints: computed.basePoints,
-    hashtagBonus: computed.hashtagBonus,
-    crossPostBonus: computed.crossPostBonus,
-    calculatedPoints: computed.calculatedPoints,
-    platformCount: computed.platformCount
-  };
-
-  const key = `submissions/${teamId}/${submissionId}.json`;
-  await store.set(key, JSON.stringify(submission), { contentType: "application/json" });
-
-  // Update index
-  const idxKey = existingIdxKey;
-  const items = existingItems;
-  items.push({
-    submissionId,
-    createdAt: now,
-    submissionType: submission.submissionType,
-    submissionDate: submission.submissionDate,
-    primaryUrl: submission.primaryUrl,
-    expectedPoints: submission.expectedPoints,
-    calculatedPoints: submission.calculatedPoints
-  });
-  await store.set(idxKey, JSON.stringify({ items }), { contentType: "application/json" });
-
-  return json(201, { submission });
 };

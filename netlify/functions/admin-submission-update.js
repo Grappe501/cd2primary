@@ -1,60 +1,73 @@
+
+// Overlay 29: Audit Trail Repair
+// - Writes audit entry
+// - Appends to index.json (append-only)
+
 import { getStore } from "@netlify/blobs";
-import { requireAdmin } from "./_lib/admin.js";
+import { requireAdmin } from "./_lib/adminAuth.js";
 import { json } from "./_lib/team.js";
 
-const ALLOWED = new Set(["pending", "approved", "rejected"]);
+export default async (req) => {
+  const admin = await requireAdmin(req);
+  if (!admin.ok) return admin.res;
 
-export default async (req, context) => {
-  if (req.method !== "POST") return json(405, { error: "Method not allowed" });
-
-  const admin = requireAdmin(context);
-  if (!admin.ok) return admin.response;
-
-  let body;
-  try {
-    body = await req.json();
-  } catch {
-    return json(400, { error: "Invalid JSON" });
+  if (req.method !== "POST") {
+    return json(405, { error: { code: "method_not_allowed", message: "POST required" } });
   }
 
-  const teamId = String(body?.teamId || "").trim();
-  const submissionId = String(body?.submissionId || "").trim();
-  const status = String(body?.status || "").trim().toLowerCase();
-  const adminNote = String(body?.adminNote || "").trim();
+  try {
+    const body = JSON.parse(req.body || "{}");
+    const { teamId, submissionId, action } = body;
 
-  if (!teamId) return json(422, { error: "teamId is required" });
-  if (!submissionId) return json(422, { error: "submissionId is required" });
-  if (!ALLOWED.has(status)) return json(422, { error: "status must be pending|approved|rejected" });
+    if (!teamId || !submissionId || !action) {
+      return json(400, { error: { code: "invalid_payload", message: "Missing required fields" } });
+    }
 
-  const store = getStore("teams");
-  const key = `submissions/${teamId}/${submissionId}.json`;
-  const sub = await store.get(key, { type: "json" }).catch(() => null);
-  if (!sub) return json(404, { error: "Submission not found" });
+    const store = getStore("primary");
 
-  const before = { status: sub.status || "pending", adminNote: sub.adminNote || "" };
-  const now = new Date().toISOString();
+    const submissionKey = `submissions/${teamId}/${submissionId}.json`;
+    const submission = await store.get(submissionKey, { type: "json" });
+    if (!submission) {
+      return json(404, { error: { code: "submission_not_found", message: "Submission not found" } });
+    }
 
-  const updated = {
-    ...sub,
-    status,
-    adminNote,
-    updatedAt: now,
-    reviewedAt: now,
-    reviewedBy: admin.user.email || admin.user.sub
-  };
+    const before = { status: submission.status, points: submission.points };
+    submission.status = action === "approved" ? "approved" : "rejected";
+    const after = { status: submission.status, points: submission.points };
 
-  await store.setJSON(key, updated);
+    await store.setJSON(submissionKey, submission);
 
-  // Minimal audit trail (one file per review action)
-  const auditKey = `audits/${teamId}/${submissionId}/${now.replace(/[:.]/g, "-")}.json`;
-  await store.setJSON(auditKey, {
-    teamId,
-    submissionId,
-    reviewedAt: now,
-    reviewedBy: updated.reviewedBy,
-    before,
-    after: { status, adminNote }
-  }).catch(() => {});
+    const timestamp = new Date().toISOString();
+    const auditEntry = {
+      id: `${submissionId}-${timestamp}`,
+      action,
+      reviewedAt: timestamp,
+      reviewedBy: admin.email,
+      before,
+      after
+    };
 
-  return json(200, { submission: updated });
+    const auditDir = `audits/${teamId}/${submissionId}`;
+    const auditKey = `${auditDir}/${timestamp}.json`;
+    await store.setJSON(auditKey, auditEntry);
+
+    const indexKey = `${auditDir}/index.json`;
+    const existingIndex = await store.get(indexKey, { type: "json" }) || [];
+    existingIndex.push({
+      id: auditEntry.id,
+      action: auditEntry.action,
+      reviewedAt: auditEntry.reviewedAt,
+      reviewedBy: auditEntry.reviewedBy
+    });
+
+    await store.setJSON(indexKey, existingIndex);
+
+    return json(200, { data: { success: true } });
+
+  } catch (err) {
+    return json(500, {
+      error: { code: "admin_update_failed", message: "Failed to update submission" },
+      details: String(err?.message || err)
+    });
+  }
 };
