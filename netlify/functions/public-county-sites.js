@@ -23,15 +23,14 @@ export default async (req) => {
   try {
     const sql = getSql();
 
-    // IMPORTANT:
-    // counties.id is UUID, but elections.county_id is treated as a TEXT slug (e.g. "faulkner").
-    // So we join slug-to-slug, not uuid-to-text.
+    // Schema truth: counties.id is INTEGER and elections.county_id is INTEGER FK -> counties.id
     const electionRows = await sql`
       SELECT e.id, e.election_date, e.name, e.election_type, e.notes
-      FROM elections e
-      JOIN counties c ON c.slug = e.county_id
-      WHERE c.slug = ${county} AND e.election_date = ${electionDate}::date
-      ORDER BY e.id DESC
+      FROM public.elections e
+      JOIN public.counties c ON c.id = e.county_id
+      WHERE c.slug = ${county}
+        AND e.election_date = ${electionDate}::date
+      ORDER BY e.updated_at DESC, e.id DESC
       LIMIT 1
     `;
 
@@ -60,8 +59,8 @@ export default async (req) => {
         w.start_ts,
         w.end_ts,
         w.notes AS window_notes
-      FROM voting_sites vs
-      JOIN voting_site_windows w ON w.voting_site_id = vs.id
+      FROM public.voting_sites vs
+      JOIN public.voting_site_windows w ON w.voting_site_id = vs.id
       WHERE w.election_id = ${e.id}
       ORDER BY w.kind, vs.city, vs.name, w.start_ts
     `;
