@@ -1,9 +1,11 @@
 // Overlay 07: Submissions hub (client)
 // Overlay 09: Scoring preview + area type for polling-location videos
+// Overlay 26B: Hardening (timeouts + retry + offline + explicit failure states)
 // Operating principle: volunteers do not get points unless they list the submission.
 
 const wrap = document.getElementById("submissionsWrap");
 const btnNew = document.getElementById("btnNewSubmission");
+const btnRetry = document.getElementById("btnRetrySubmissions");
 const formWrap = document.getElementById("submissionFormWrap");
 const form = document.getElementById("submissionForm");
 const btnCancel = document.getElementById("btnCancelSubmission");
@@ -12,6 +14,12 @@ const submissionTypeEl = document.getElementById("submissionType");
 const statusEl = document.getElementById("submissionsStatus");
 const listEl = document.getElementById("submissionsList");
 const expectedHintEl = document.getElementById("expectedHint");
+
+function refToken() {
+  const d = new Date();
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`;
+}
 
 function h(tag, attrs = {}, children = []) {
   const el = document.createElement(tag);
@@ -46,6 +54,14 @@ function setStatus(msg = "", { ok = true } = {}) {
   statusEl.style.color = ok ? "" : "var(--danger, #b42318)";
 }
 
+function fetchWithTimeout(promiseFactory, timeoutMs = 9000) {
+  let t;
+  const timeout = new Promise((_, rej) => {
+    t = setTimeout(() => rej(new Error("timeout")), timeoutMs);
+  });
+  return Promise.race([promiseFactory(), timeout]).finally(() => clearTimeout(t));
+}
+
 function readForm() {
   const fd = new FormData(form);
   const get = (k) => String(fd.get(k) || "").trim();
@@ -76,18 +92,12 @@ function readForm() {
 
 function platformLabel(slug) {
   switch (slug) {
-    case "tiktok":
-      return "TikTok";
-    case "instagram":
-      return "Instagram";
-    case "facebook":
-      return "Facebook";
-    case "x":
-      return "X";
-    case "bluesky":
-      return "Bluesky";
-    default:
-      return slug;
+    case "tiktok": return "TikTok";
+    case "instagram": return "Instagram";
+    case "facebook": return "Facebook";
+    case "x": return "X";
+    case "bluesky": return "Bluesky";
+    default: return slug;
   }
 }
 
@@ -95,6 +105,24 @@ function getPrimaryLink(sub) {
   if (sub.primaryUrl) return sub.primaryUrl;
   const links = sub.platformLinks && typeof sub.platformLinks === "object" ? sub.platformLinks : {};
   return links.tiktok || links.instagram || links.facebook || links.x || links.bluesky || sub.videoUrl || "";
+}
+
+function renderLoadFailCard(message, ref, { showRetry = true } = {}) {
+  if (!listEl) return;
+  listEl.innerHTML = "";
+  listEl.appendChild(
+    h("div", { class: "card" }, [
+      h("div", { class: "badge", text: "Service unavailable" }),
+      h("p", { class: "lede", style: "margin:.5rem 0 0 0;" }, [message]),
+      h("div", { class: "help", style: "margin-top:.35rem;" }, [`Ref: ${ref}`]),
+      h("div", { class: "row", style: "margin-top:.75rem; flex-wrap:wrap;" }, [
+        showRetry ? h("button", { class: "btn", type: "button", id: "btnRetryInline", text: "Retry" }) : null,
+        h("a", { class: "btn", href: "/status/" }, ["Status"])
+      ])
+    ])
+  );
+  const inline = document.getElementById("btnRetryInline");
+  if (inline && showRetry) inline.addEventListener("click", () => btnRetry?.click());
 }
 
 function renderList(submissions = []) {
@@ -131,7 +159,11 @@ function renderList(submissions = []) {
         h("div", { class: "card", style: "margin-bottom:.75rem;" }, [
           h("div", { class: "spread", style: "gap:1rem; align-items:flex-start;" }, [
             h("div", {}, [
-              h("div", { class: "badge", text: status === "approved" ? "Approved" : status === "rejected" ? "Rejected" : "Pending review" }),
+              h("div", {
+                class: "badge",
+                text:
+                  status === "approved" ? "Approved" : status === "rejected" ? "Rejected" : "Pending review"
+              }),
               h("h3", { style: "margin:.5rem 0 0 0;" }, [
                 h(
                   "a",
@@ -183,7 +215,7 @@ function renderList(submissions = []) {
 function setTypeUI() {
   const type = submissionTypeEl?.value || "";
   const showPolling = type === "polling_location";
-  pollingFields.hidden = !showPolling;
+  if (pollingFields) pollingFields.hidden = !showPolling;
   updateExpectedHint();
 }
 
@@ -251,23 +283,48 @@ export function initSubmissions({ api, onChanged } = {}) {
 
   async function load() {
     if (!currentTeam) {
-      wrap.hidden = true;
+      if (wrap) wrap.hidden = true;
       onChanged && onChanged([]);
       return;
     }
 
-    wrap.hidden = false;
-    setStatus("Loading submissions...");
-    const { res, data } = await api("/.netlify/functions/submission-list");
-    if (!res.ok) {
-      setStatus(data?.error || "Could not load submissions.", { ok: false });
-      renderList([]);
+    if (wrap) wrap.hidden = false;
+
+    // Offline? Say it clearly.
+    if (navigator && navigator.onLine === false) {
+      const ref = refToken();
+      setStatus(`⚠️ You appear to be offline. Reconnect and click Retry. (Ref: ${ref})`, { ok: false });
+      renderLoadFailCard("You appear to be offline. Reconnect and retry.", ref, { showRetry: true });
       onChanged && onChanged([]);
       return;
     }
-    setStatus("");
-    renderList(data.submissions || []);
-    onChanged && onChanged(data.submissions || []);
+
+    setStatus("Loading submissions...");
+    try {
+      const { res, data } = await fetchWithTimeout(() => api("/.netlify/functions/submission-list"), 9000);
+
+      if (!res.ok) {
+        const ref = refToken();
+        const msg = data?.error || "Could not load submissions.";
+        setStatus(`⚠️ ${msg} (Ref: ${ref})`, { ok: false });
+        renderLoadFailCard(msg, ref, { showRetry: true });
+        onChanged && onChanged([]);
+        return;
+      }
+
+      setStatus("");
+      renderList(data.submissions || []);
+      onChanged && onChanged(data.submissions || []);
+    } catch (err) {
+      const ref = refToken();
+      const msg =
+        err && String(err.message || err).includes("timeout")
+          ? "Request timed out while loading submissions."
+          : "Network error while loading submissions.";
+      setStatus(`⚠️ ${msg} (Ref: ${ref})`, { ok: false });
+      renderLoadFailCard(msg, ref, { showRetry: true });
+      onChanged && onChanged([]);
+    }
   }
 
   async function submit(e) {
@@ -279,14 +336,20 @@ export function initSubmissions({ api, onChanged } = {}) {
 
     const payload = readForm();
     const btn = document.getElementById("btnSubmitVideo");
-    btn.disabled = true;
-    btn.textContent = "Submitting...";
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = "Submitting...";
+    }
 
     try {
-      const { res, data } = await api("/.netlify/functions/submission-create", {
-        method: "POST",
-        body: payload
-      });
+      const { res, data } = await fetchWithTimeout(
+        () =>
+          api("/.netlify/functions/submission-create", {
+            method: "POST",
+            body: payload
+          }),
+        12000
+      );
 
       if (!res.ok) {
         if (res.status === 422) {
@@ -294,35 +357,46 @@ export function initSubmissions({ api, onChanged } = {}) {
           setStatus("Fix the highlighted fields and try again.", { ok: false });
           return;
         }
-        setStatus(data?.error || "Submission failed.", { ok: false });
+        const ref = refToken();
+        setStatus(`${data?.error || "Submission failed."} (Ref: ${ref})`, { ok: false });
         return;
       }
 
       // Success
       form.reset();
-      pollingFields.hidden = true;
-      formWrap.hidden = true;
+      if (pollingFields) pollingFields.hidden = true;
+      if (formWrap) formWrap.hidden = true;
       setStatus("Submitted. It will appear below as pending review.");
       await load();
+    } catch (err) {
+      const ref = refToken();
+      const msg =
+        err && String(err.message || err).includes("timeout")
+          ? "Request timed out during submit."
+          : "Network error during submit.";
+      setStatus(`⚠️ ${msg} (Ref: ${ref})`, { ok: false });
     } finally {
-      btn.disabled = false;
-      btn.textContent = "Submit";
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = "Submit";
+      }
     }
   }
 
   function openForm() {
-    formWrap.hidden = false;
+    if (formWrap) formWrap.hidden = false;
     setTypeUI();
     document.getElementById("link_tiktok")?.focus();
   }
 
   function closeForm() {
-    formWrap.hidden = true;
+    if (formWrap) formWrap.hidden = true;
   }
 
   // Wire events
   btnNew?.addEventListener("click", openForm);
   btnCancel?.addEventListener("click", closeForm);
+  btnRetry?.addEventListener("click", load);
   submissionTypeEl?.addEventListener("change", setTypeUI);
   form?.addEventListener("submit", submit);
 
@@ -345,6 +419,12 @@ export function initSubmissions({ api, onChanged } = {}) {
   });
   document.querySelectorAll('input[name="claimedItems"]').forEach((el) => {
     el.addEventListener("change", updateExpectedHint);
+  });
+
+  // If network goes offline, we show explicit status
+  window.addEventListener("offline", () => {
+    const ref = refToken();
+    setStatus(`⚠️ You went offline. Reconnect and click Retry. (Ref: ${ref})`, { ok: false });
   });
 
   return {

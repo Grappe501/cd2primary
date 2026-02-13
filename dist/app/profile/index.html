@@ -46,6 +46,7 @@
               <button class="btn" id="btnAccount" type="button">Account</button>
               <button class="btn" id="btnLogout" type="button">Log out</button>
               <a class="btn" href="/leaderboard/">Leaderboard</a>
+              <a class="btn" href="/status/">Status</a>
             </div>
           </div>
 
@@ -158,11 +159,13 @@
                     </p>
                     <div class="help">
                       Minimum requirement: <strong>at least one platform link</strong> (TikTok/Instagram/Facebook/X/Bluesky).
-                      If you cross-post to multiple platforms, include those links too.
+                      If you cross-post, include those links too.
                     </div>
                   </div>
                   <div class="row">
                     <button class="btn primary" id="btnNewSubmission" type="button">Submit a Video</button>
+                    <button class="btn" id="btnRetrySubmissions" type="button">Retry Load</button>
+                    <a class="btn" href="/status/">Status</a>
                   </div>
                 </div>
 
@@ -347,12 +350,13 @@ Here’s what you need to know today:
           <a href="/rules/">Rules</a>
           <a href="/leaderboard/">Leaderboard</a>
           <a href="/counties/">Counties</a>
+          <a href="/status/">Status</a>
         </div>
       </div>
     </footer>
 
     <script type="module">
-      // Simple, self-contained helper. Does not depend on profile.js.
+      // Copy caption helper (independent of profile.js)
       const btn = document.getElementById("btnCopyCaption");
       const ta = document.getElementById("captionTemplate");
       const status = document.getElementById("captionCopyStatus");
