@@ -3,16 +3,18 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Edit your team profile and manage your scavenger hunt submissions." />
-  <meta name="theme-color" content="#0b1220" />
-  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+    <meta
+      name="description"
+      content="Edit your team profile and manage your scavenger hunt submissions."
+    />
+    <meta name="theme-color" content="#0b1220" />
+    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
 
     <link rel="stylesheet" href="/assets/css/site.css" />
     <title>Team Profile • AR-02 #PrimaryVote! Scavenger Hunt</title>
     <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
   </head>
   <body>
-
     <header class="nav">
       <div class="container nav-inner spread">
         <a class="brand" href="/">
@@ -39,7 +41,6 @@
                 This is your official team profile. All submissions and points are tied to this page.
               </p>
               <div id="scoreBox"></div>
-
             </div>
             <div class="row">
               <button class="btn" id="btnAccount" type="button">Account</button>
@@ -53,9 +54,7 @@
           <div id="status" class="badge" aria-live="polite">Checking login status…</div>
 
           <div id="signedOut" hidden>
-            <p>
-              You must sign in to create or edit your team.
-            </p>
+            <p>You must sign in to create or edit your team.</p>
             <div class="row">
               <a class="btn primary" href="/app/">Go to Join / Sign In</a>
               <button class="btn" id="btnSignIn" type="button">Sign In Here</button>
@@ -69,7 +68,7 @@
                 <form id="teamForm">
                   <label class="label" for="teamName">Team Name</label>
                   <input class="input" id="teamName" name="teamName" required />
-                  <div class="help" id="err_teamName"></div>
+                  <div class="help" id="err_teamName" aria-live="polite"></div>
 
                   <label class="label" for="homeCounty">Home County</label>
                   <select class="input" id="homeCounty" name="homeCounty" required>
@@ -83,7 +82,7 @@
                     <option value="van-buren">Van Buren</option>
                     <option value="white">White</option>
                   </select>
-                  <div class="help" id="err_homeCounty"></div>
+                  <div class="help" id="err_homeCounty" aria-live="polite"></div>
 
                   <hr class="hr" />
 
@@ -91,19 +90,31 @@
 
                   <label class="label" for="member1Name">Member 1 Name</label>
                   <input class="input" id="member1Name" name="member1Name" required />
-                  <div class="help" id="err_member1Name"></div>
+                  <div class="help" id="err_member1Name" aria-live="polite"></div>
 
                   <label class="label" for="member1TikTok">Member 1 TikTok Handle</label>
-                  <input class="input" id="member1TikTok" name="member1TikTok" placeholder="@handle" required />
-                  <div class="help" id="err_member1TikTok"></div>
+                  <input
+                    class="input"
+                    id="member1TikTok"
+                    name="member1TikTok"
+                    placeholder="@handle"
+                    required
+                  />
+                  <div class="help" id="err_member1TikTok" aria-live="polite"></div>
 
                   <label class="label" for="member2Name">Member 2 Name</label>
                   <input class="input" id="member2Name" name="member2Name" required />
-                  <div class="help" id="err_member2Name"></div>
+                  <div class="help" id="err_member2Name" aria-live="polite"></div>
 
                   <label class="label" for="member2TikTok">Member 2 TikTok Handle</label>
-                  <input class="input" id="member2TikTok" name="member2TikTok" placeholder="@handle" required />
-                  <div class="help" id="err_member2TikTok"></div>
+                  <input
+                    class="input"
+                    id="member2TikTok"
+                    name="member2TikTok"
+                    placeholder="@handle"
+                    required
+                  />
+                  <div class="help" id="err_member2TikTok" aria-live="polite"></div>
 
                   <div class="row">
                     <button class="btn primary" id="btnSave" type="submit">Save Team Profile</button>
@@ -111,7 +122,7 @@
                   </div>
 
                   <p class="lede">
-                    This is your official team identity. Next: log your videos below.
+                    Save your Team Profile first. Then submit your videos below.
                   </p>
                 </form>
               </div>
@@ -129,6 +140,7 @@
                     <li><strong>One team per account.</strong></li>
                     <li><strong>Teams of two.</strong> Both TikTok handles are required.</li>
                     <li><strong>If you don’t list it, you don’t get it.</strong></li>
+                    <li><strong>Admins do not hunt for points.</strong> Your submission must include the link.</li>
                   </ul>
                 </div>
               </aside>
@@ -144,6 +156,10 @@
                     <p class="lede">
                       Volunteers do not get points unless they list the submission.
                     </p>
+                    <div class="help">
+                      Minimum requirement: <strong>at least one platform link</strong> (TikTok/Instagram/Facebook/X/Bluesky).
+                      If you cross-post to multiple platforms, include those links too.
+                    </div>
                   </div>
                   <div class="row">
                     <button class="btn primary" id="btnNewSubmission" type="button">Submit a Video</button>
@@ -156,12 +172,13 @@
                       <div>
                         <h3>Platforms & Links</h3>
                         <p class="help">
-                          Submit to <strong>TikTok</strong>, <strong>Instagram</strong>, <strong>Facebook</strong>, <strong>X</strong>, or <strong>Bluesky</strong> — your choice.
-                          <strong>Cross-post bonus:</strong> +5 expected points for each additional platform you posted on.
+                          Submit to <strong>TikTok</strong>, <strong>Instagram</strong>, <strong>Facebook</strong>, <strong>X</strong>, or <strong>Bluesky</strong>.
+                          <strong>Cross-post bonus:</strong> additional platforms can earn extra points when verified.
                         </p>
 
                         <label class="label" for="link_tiktok">TikTok link (optional)</label>
                         <input class="input" id="link_tiktok" name="link_tiktok" placeholder="https://www.tiktok.com/..." />
+                        <div class="help">Tip: open your post → Share → Copy link.</div>
 
                         <label class="label" for="link_instagram">Instagram link (optional)</label>
                         <input class="input" id="link_instagram" name="link_instagram" placeholder="https://www.instagram.com/reel/..." />
@@ -175,7 +192,33 @@
                         <label class="label" for="link_bluesky">Bluesky link (optional)</label>
                         <input class="input" id="link_bluesky" name="link_bluesky" placeholder="https://bsky.app/profile/..." />
 
-                        <div class="help" id="err_platformLinks"></div>
+                        <div class="help" id="err_platformLinks" aria-live="polite"></div>
+
+                        <hr class="hr" />
+
+                        <h3>Caption checklist (copy/paste)</h3>
+                        <div class="help">
+                          Your caption must include <strong>#PrimaryVote!</strong> and <strong>#ChrisJonesforCongress</strong>.
+                          Use this template to avoid missing points.
+                        </div>
+
+                        <textarea class="input" id="captionTemplate" rows="5" readonly>#PrimaryVote! #ChrisJonesforCongress
+
+I’m at: [POLLING LOCATION NAME]
+Address: [ADDRESS]
+County: [COUNTY]
+
+Here’s what you need to know today:
+- [1 fact about voting here]
+- [1 fact about dates/times]
+- [1 encouragement to vote]
+</textarea>
+                        <div class="row">
+                          <button class="btn" id="btnCopyCaption" type="button">Copy Caption Template</button>
+                        </div>
+                        <div class="help" id="captionCopyStatus" aria-live="polite"></div>
+
+                        <hr class="hr" />
 
                         <label class="label" for="submissionType">Submission Type</label>
                         <select class="input" id="submissionType" name="submissionType" required>
@@ -187,17 +230,18 @@
                           <option value="candidate_interview">Candidate Interview Bonus</option>
                           <option value="other">Other / Notes</option>
                         </select>
-                        <div class="help" id="err_submissionType"></div>
+                        <div class="help" id="err_submissionType" aria-live="polite"></div>
 
                         <label class="label" for="submissionDate">Posting Date</label>
                         <input class="input" id="submissionDate" name="submissionDate" type="date" required />
-                        <div class="help" id="err_submissionDate"></div>
+                        <div class="help" id="err_submissionDate" aria-live="polite"></div>
 
-                        <label class="label" for="expectedPoints">Expected Points (what you believe you earned)</label>
+                        <label class="label" for="expectedPoints">Your estimate (expected points)</label>
                         <input class="input" id="expectedPoints" name="expectedPoints" type="number" min="0" step="1" required />
-                        <div class="help" id="err_expectedPoints"></div>
-                        <div id="expectedHint" class="help"></div>
-
+                        <div class="help" id="err_expectedPoints" aria-live="polite"></div>
+                        <div id="expectedHint" class="help">
+                          This is your best guess. Final official points are calculated by the scoring engine after review.
+                        </div>
                       </div>
 
                       <div>
@@ -214,22 +258,25 @@
                             <option value="van-buren">Van Buren</option>
                             <option value="white">White</option>
                           </select>
-                          <div class="help" id="err_pollingCounty"></div>
+                          <div class="help" id="err_pollingCounty" aria-live="polite"></div>
 
                           <label class="label" for="pollingAreaType">Polling Location Area Type</label>
                           <select class="input" id="pollingAreaType" name="pollingAreaType">
                             <option value="">Select an area type…</option>
                             <option value="little_rock">Little Rock</option>
-                            <option value="major_city">City limits (Searcy, Conway, Bryant, Benton, Sherwood, Jacksonville, Maumelle)</option>
+                            <option value="major_city">
+                              City limits (Searcy, Conway, Bryant, Benton, Sherwood, Jacksonville, Maumelle)
+                            </option>
                             <option value="other">All other locations</option>
                           </select>
-                          <div class="help" id="err_pollingAreaType"></div>
+                          <div class="help" id="err_pollingAreaType" aria-live="polite"></div>
 
                           <label class="label" for="pollingName">Polling Location Name (as written on site)</label>
                           <input class="input" id="pollingName" name="pollingName" />
 
                           <label class="label">Claimed Checklist Items</label>
                           <div class="help">We only verify what you claim. If you don’t list it, you don’t get it.</div>
+
                           <label class="row">
                             <input type="checkbox" name="claimedItems" value="address" /> Address of the polling location
                           </label>
@@ -245,17 +292,32 @@
                           <label class="row">
                             <input type="checkbox" name="claimedItems" value="say_vote_chris" /> Say “Vote for Chris Jones for Congress”
                           </label>
-                          <div class="help" id="err_claimedItems"></div>
+                          <div class="help" id="err_claimedItems" aria-live="polite"></div>
                         </div>
 
                         <label class="label" for="notes">Notes (optional)</label>
-                        <textarea class="input" id="notes" name="notes" rows="6" placeholder="Anything the reviewers should know…"></textarea>
+                        <textarea
+                          class="input"
+                          id="notes"
+                          name="notes"
+                          rows="6"
+                          placeholder="Anything the reviewers should know (ex: this is a repost from yesterday, audio issues, etc.)…"
+                        ></textarea>
 
                         <label class="row">
                           <input type="checkbox" id="confirmHashtags" name="confirmHashtags" required />
                           I confirm the caption includes <strong>#PrimaryVote!</strong> and <strong>#ChrisJonesforCongress</strong>.
                         </label>
-                        <div class="help" id="err_confirmHashtags"></div>
+                        <div class="help" id="err_confirmHashtags" aria-live="polite"></div>
+
+                        <hr class="hr" />
+
+                        <h3>What happens after you submit</h3>
+                        <ul>
+                          <li>Your submission shows as <strong>Pending</strong> until reviewed.</li>
+                          <li>Admins verify only what you claimed and what you linked.</li>
+                          <li>Approved submissions update the Leaderboard.</li>
+                        </ul>
 
                         <div class="row">
                           <button class="btn primary" id="btnSubmitVideo" type="submit">Submit</button>
@@ -266,7 +328,7 @@
                   </form>
                 </div>
 
-                <div id="submissionsStatus" class="help"></div>
+                <div id="submissionsStatus" class="help" aria-live="polite"></div>
                 <div id="submissionsList"></div>
               </div>
             </div>
@@ -288,6 +350,33 @@
         </div>
       </div>
     </footer>
+
+    <script type="module">
+      // Simple, self-contained helper. Does not depend on profile.js.
+      const btn = document.getElementById("btnCopyCaption");
+      const ta = document.getElementById("captionTemplate");
+      const status = document.getElementById("captionCopyStatus");
+
+      if (btn && ta) {
+        btn.addEventListener("click", async () => {
+          try {
+            ta.focus();
+            ta.select();
+            const text = ta.value;
+
+            if (navigator.clipboard?.writeText) {
+              await navigator.clipboard.writeText(text);
+            } else {
+              document.execCommand("copy");
+            }
+
+            if (status) status.textContent = "Copied. Paste it into your caption and fill in the blanks.";
+          } catch (e) {
+            if (status) status.textContent = "Copy failed. Select the text and copy manually.";
+          }
+        });
+      }
+    </script>
 
     <script type="module" src="/assets/js/profile.js"></script>
   </body>
