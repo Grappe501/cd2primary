@@ -3,10 +3,9 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Join the AR-02 #PrimaryVote! Scavenger Hunt, create your team profile, and submit video links for scoring." />
-  <meta name="theme-color" content="#0b1220" />
-  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
-
+    <meta name="description" content="Join the AR-02 #PrimaryVote! Scavenger Hunt, create your team profile, and submit video links for official scoring." />
+    <meta name="theme-color" content="#0b1220" />
+    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="/assets/css/site.css" />
     <title>Join / Sign In • AR-02 #PrimaryVote! Scavenger Hunt</title>
     <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
@@ -32,21 +31,27 @@
     <main class="container">
       <section class="section">
         <div class="grid cols-2">
+
+          <!-- Left: Auth + Primary Action -->
           <div class="card">
-            <h1>Join / Sign In</h1>
+            <h1>Join the Scavenger Hunt</h1>
             <p class="lede">
-              Sign in to create your official Team Profile. All submissions and points tie back to your team.
+              Sign in to create your official Team Profile. All submissions and points are tied to your team.
             </p>
+
             <div class="row">
               <button class="btn primary" id="btnOpen">Open Sign In</button>
               <a class="btn" href="/rules/">Read the Rules</a>
               <a class="btn" href="/leaderboard/">View Leaderboard</a>
             </div>
+
             <hr class="hr" />
+
             <div id="status" class="badge" aria-live="polite">Checking login status…</div>
+
             <div id="authedActions" hidden>
-              <p>
-                You’re signed in. Head to your profile to create or edit your Team.
+              <p class="lede">
+                You’re signed in. Continue to your Team Profile to create or edit your team and submit videos.
               </p>
               <div class="row">
                 <a class="btn primary" href="/app/profile/">Go to Team Profile</a>
@@ -55,18 +60,33 @@
             </div>
           </div>
 
+          <!-- Right: Clear Process -->
           <aside class="card">
-            <h2>What you’ll do next</h2>
+            <h2>How it works</h2>
             <ol>
-              <li>Create a Team Profile (teams of two)</li>
-              <li>Pick your home county</li>
-              <li>Link your TikTok handles</li>
-              <li>Start earning points (Submissions launch in Overlay 07)</li>
+              <li>Create your Team Profile (teams of two).</li>
+              <li>Select your home county.</li>
+              <li>Post daily vertical videos from polling locations.</li>
+              <li>Submit your video links inside your Team Profile.</li>
+              <li>Track approval and points on the Leaderboard.</li>
             </ol>
+
             <p class="lede">
-              If you don’t list it, you don’t get it. The system is built to keep scoring clean and enforceable.
+              If you don’t list it, you don’t get it. 
+              Points are only awarded for properly submitted and approved videos.
             </p>
+
+            <hr class="hr" />
+
+            <h3>What counts?</h3>
+            <ul>
+              <li>Polling location coverage</li>
+              <li>Daily posting consistency</li>
+              <li>Required hashtags</li>
+              <li>Cross-post bonus</li>
+            </ul>
           </aside>
+
         </div>
       </section>
     </main>
