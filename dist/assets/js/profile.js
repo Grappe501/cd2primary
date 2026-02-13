@@ -8,6 +8,10 @@ const btnSignIn = document.getElementById("btnSignIn");
 const btnAccount = document.getElementById("btnAccount");
 const btnLogout = document.getElementById("btnLogout");
 const btnReload = document.getElementById("btnReload");
+
+// Optional (added in Overlay 26B profile page)
+const btnRetrySubmissions = document.getElementById("btnRetrySubmissions");
+
 const form = document.getElementById("teamForm");
 const teamStateEl = document.getElementById("teamState");
 const teamMetaEl = document.getElementById("teamMeta");
@@ -32,7 +36,14 @@ function esc(s) {
     .replaceAll("'", "&#039;");
 }
 
+function refToken() {
+  const d = new Date();
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`;
+}
+
 function setStatus(text, { ok = true } = {}) {
+  if (!statusEl) return;
   statusEl.textContent = text;
   statusEl.classList.toggle("success", ok);
 }
@@ -60,9 +71,7 @@ function renderChecklist() {
 
 function clearErrors() {
   const els = document.querySelectorAll("[id^='err_']");
-  els.forEach((el) => {
-    el.textContent = "";
-  });
+  els.forEach((el) => (el.textContent = ""));
 }
 
 function showErrors(errors = {}) {
@@ -98,21 +107,6 @@ function fillForm(team) {
   set("member2TikTok", team?.member2TikTok);
 }
 
-async function api(path, { method = "GET", body } = {}) {
-  const token = await getAccessToken();
-  const headers = {
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    ...(body ? { "content-type": "application/json" } : {})
-  };
-  const res = await fetch(path, {
-    method,
-    headers,
-    body: body ? JSON.stringify(body) : undefined
-  });
-  const data = await res.json().catch(() => ({}));
-  return { res, data };
-}
-
 function renderScore(score) {
   if (!scoreBox) return;
   if (!score) {
@@ -141,18 +135,73 @@ function renderScore(score) {
           <div class="value"><strong>${esc(score.eightCountySweepBonus)}</strong></div>
         </div>
       </div>
-      <div class="help mt-3">Official points only count once a submission is approved (admin review comes later). Provisional points help you self-check.</div>
+      <div class="help mt-3">
+        Official points only count once a submission is approved (admin review comes later).
+        Provisional points help you self-check.
+      </div>
     </div>
   `;
+}
+
+async function fetchWithTimeout(url, opts = {}, timeoutMs = 9000) {
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...opts, signal: ctrl.signal });
+  } finally {
+    clearTimeout(t);
+  }
+}
+
+async function api(path, { method = "GET", body, timeoutMs } = {}) {
+  const token = await getAccessToken();
+  const headers = {
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...(body ? { "content-type": "application/json" } : {})
+  };
+
+  const res = await fetchWithTimeout(
+    path,
+    {
+      method,
+      headers,
+      body: body ? JSON.stringify(body) : undefined
+    },
+    timeoutMs ?? 9000
+  );
+
+  const data = await res.json().catch(() => ({}));
+  return { res, data };
+}
+
+function isOffline() {
+  return typeof navigator !== "undefined" && navigator.onLine === false;
 }
 
 async function loadScore() {
   const user = currentUser();
   if (!user) return;
 
-  const { res, data } = await api("/.netlify/functions/score-get");
-  if (!res.ok) return;
-  renderScore(data.score);
+  if (isOffline()) {
+    const ref = refToken();
+    setStatus(`⚠️ You appear to be offline. Reconnect and retry. (Ref: ${ref})`, { ok: false });
+    return;
+  }
+
+  try {
+    const { res, data } = await api("/.netlify/functions/score-get", { timeoutMs: 9000 });
+    if (!res.ok) {
+      const ref = refToken();
+      setStatus(`⚠️ Could not load score. (Ref: ${ref})`, { ok: false });
+      return;
+    }
+    renderScore(data.score);
+  } catch (err) {
+    const ref = refToken();
+    const msg = String(err?.message || err);
+    const hint = msg.includes("AbortError") ? "Request timed out" : "Network error";
+    setStatus(`⚠️ ${hint} while loading score. (Ref: ${ref})`, { ok: false });
+  }
 }
 
 async function loadTeam() {
@@ -160,40 +209,58 @@ async function loadTeam() {
   const user = currentUser();
   if (!user) return;
 
+  if (isOffline()) {
+    const ref = refToken();
+    teamStateEl.textContent = "Offline";
+    teamStateEl.classList.remove("success");
+    teamMetaEl.textContent = "";
+    setStatus(`⚠️ You appear to be offline. Reconnect and retry. (Ref: ${ref})`, { ok: false });
+    return;
+  }
+
   teamStateEl.textContent = "Loading…";
   teamStateEl.classList.remove("success");
   teamMetaEl.textContent = "";
 
-  const { res, data } = await api("/.netlify/functions/team-get");
-  if (!res.ok) {
-    teamStateEl.textContent = "Error";
-    setStatus(data?.error || "Could not load team.", { ok: false });
-    return;
-  }
+  try {
+    const { res, data } = await api("/.netlify/functions/team-get", { timeoutMs: 9000 });
 
-  loadedTeam = data.team;
-  if (!loadedTeam) {
-    teamStateEl.textContent = "No team yet — create one below.";
-    teamStateEl.classList.remove("success");
-    fillForm(null);
-    teamMetaEl.textContent = "";
-    renderScore(null);
+    if (!res.ok) {
+      const ref = refToken();
+      teamStateEl.textContent = "Error";
+      setStatus(`${data?.error || "Could not load team."} (Ref: ${ref})`, { ok: false });
+      return;
+    }
 
-    // Hide submissions until a team exists.
-    submissions?.setTeam(null);
+    loadedTeam = data.team;
+
+    if (!loadedTeam) {
+      teamStateEl.textContent = "No team yet — create one below.";
+      teamStateEl.classList.remove("success");
+      fillForm(null);
+      teamMetaEl.textContent = "";
+      renderScore(null);
+
+      submissions?.setTeam(null);
+      renderChecklist();
+      return;
+    }
+
+    teamStateEl.textContent = `Team loaded: ${loadedTeam.teamName}`;
+    teamStateEl.classList.add("success");
+    fillForm(loadedTeam);
+    teamMetaEl.textContent = `Team ID: ${loadedTeam.teamId} • Updated: ${new Date(loadedTeam.updatedAt).toLocaleString()}`;
+
+    submissions?.setTeam(loadedTeam);
+    await loadScore();
     renderChecklist();
-    return;
+  } catch (err) {
+    const ref = refToken();
+    const msg = String(err?.message || err);
+    const hint = msg.includes("AbortError") ? "Request timed out" : "Network error";
+    teamStateEl.textContent = "Error";
+    setStatus(`⚠️ ${hint} while loading team. (Ref: ${ref})`, { ok: false });
   }
-
-  teamStateEl.textContent = `Team loaded: ${loadedTeam.teamName}`;
-  teamStateEl.classList.add("success");
-  fillForm(loadedTeam);
-  teamMetaEl.textContent = `Team ID: ${loadedTeam.teamId} • Updated: ${new Date(loadedTeam.updatedAt).toLocaleString()}`;
-
-  // Enable submissions hub
-  submissions?.setTeam(loadedTeam);
-  await loadScore();
-  renderChecklist();
 }
 
 async function saveTeam(e) {
@@ -203,6 +270,12 @@ async function saveTeam(e) {
   const user = currentUser();
   if (!user) {
     setStatus("You must sign in first.", { ok: false });
+    return;
+  }
+
+  if (isOffline()) {
+    const ref = refToken();
+    setStatus(`⚠️ You appear to be offline. Reconnect and retry. (Ref: ${ref})`, { ok: false });
     return;
   }
 
@@ -216,7 +289,8 @@ async function saveTeam(e) {
   try {
     const { res, data } = await api(`/.netlify/functions/${creating ? "team-create" : "team-update"}`, {
       method: creating ? "POST" : "PUT",
-      body: payload
+      body: payload,
+      timeoutMs: 12000
     });
 
     if (!res.ok) {
@@ -225,13 +299,19 @@ async function saveTeam(e) {
         setStatus("Fix the highlighted fields and try again.", { ok: false });
         return;
       }
-      setStatus(data?.error || "Save failed.", { ok: false });
+      const ref = refToken();
+      setStatus(`${data?.error || "Save failed."} (Ref: ${ref})`, { ok: false });
       return;
     }
 
     loadedTeam = data.team;
     setStatus("Saved.");
     await loadTeam();
+  } catch (err) {
+    const ref = refToken();
+    const msg = String(err?.message || err);
+    const hint = msg.includes("AbortError") ? "Request timed out" : "Network error";
+    setStatus(`⚠️ ${hint} while saving. (Ref: ${ref})`, { ok: false });
   } finally {
     btn.disabled = false;
     btn.textContent = "Save Team Profile";
@@ -254,7 +334,6 @@ function renderAuth() {
   signedInEl.hidden = false;
 
   renderChecklist();
-
   loadTeam();
 }
 
@@ -274,7 +353,17 @@ btnSignIn?.addEventListener("click", () => identity && identity.open());
 btnAccount?.addEventListener("click", () => identity && identity.open());
 btnLogout?.addEventListener("click", () => logout({ redirectTo: "/" }));
 btnReload?.addEventListener("click", () => loadTeam());
+
+// If profile page has "Retry Load" button for submissions, make it reload everything.
+btnRetrySubmissions?.addEventListener("click", () => loadTeam());
+
 form?.addEventListener("submit", saveTeam);
 
 onAuthChange(renderAuth);
 renderAuth();
+
+// If they go offline while viewing, be explicit
+window.addEventListener("offline", () => {
+  const ref = refToken();
+  setStatus(`⚠️ You went offline. Reconnect and retry. (Ref: ${ref})`, { ok: false });
+});
