@@ -159,13 +159,22 @@ Each overlay is atomic and deployable.
 ---
 
 ## Overlay 17 — Design System Completion + Routing Fix
-- Fixed Netlify rewrite ordering for `/app/profile/*`.
-- Added missing `.grid.cols-2` utility (plus `.grid.cols-4` for score layout).
-- Removed inline layout styles from `/app/`, `/app/profile/`, and the profile script to enforce consistent Design System styling.
+- Fixed Netlify rewrite ordering for `/app/profile/*`
+- Added missing `.grid.cols-2` utility
+- Removed inline layout styles from key pages
 
 ---
 
 ## Overlay 18 — Launch Polish
-- Added site meta description + theme-color + favicon across key pages (Home, Rules, Leaderboard, Team Portal, Profile).
-- Added a styled 404 page (`dist/404.html`).
-- Added SVG favicon at `/assets/favicon.svg`.
+- Added meta description + theme-color + favicon
+- Added styled 404 page
+- Added SVG favicon
+
+---
+
+## Overlay 22A — Public Elections Join Stabilization
+- Confirmed integer-based foreign key join:
+  - `counties.id` → `elections.county_id`
+- Explicit schema-qualified queries (`public.*`)
+- Removed slug/id mismatch risk permanently
+- Verified Neon branch alignment

@@ -90,3 +90,22 @@ Out of scope (kept):
 - No scoring changes
 - No schema/storage changes
 - No new features or admin tooling
+# OVERLAY-NOTES.md
+
+Operational verification notes for each overlay.
+After applying an overlay, confirm all checklist items before committing.
+
+---
+
+## Overlay 22A — Public Elections Join Stabilization
+
+Verify:
+- `public-county-sites.js` joins on:
+  - `public.counties c ON c.id = e.county_id`
+- No `slug = county_id` comparisons remain
+- No UUID casting of integer fields
+- Netlify deploy succeeds
+- No “relation does not exist” errors in function logs
+- Endpoint returns:
+  - `found: false` when no matching election
+  - `found: true` when seeded properly
